@@ -1,0 +1,10 @@
+message Header {
+  required string protocol = 1;
+}
+
+message Node {
+  required string key = 1;
+  optional bytes value = 2;
+  optional bytes trieBuffer = 3;
+  optional uint64 seq = 4;
+}
