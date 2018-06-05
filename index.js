@@ -11,16 +11,10 @@ module.exports = HyperTrie
 function HyperTrie (feed) {
   if (!(this instanceof HyperTrie)) return new HyperTrie(feed)
 
-  const self = this
-
   this.feed = feed
   this.lock = mutexify()
   this.opened = false
-  this.ready = thunky(ready)
-
-  function ready (cb) {
-    self._ready(cb)
-  }
+  this.ready = thunky(this._ready.bind(this))
 }
 
 HyperTrie.prototype._ready = function (cb) {
@@ -63,7 +57,7 @@ HyperTrie.prototype.getBySeq = function (seq, cb) {
 
   function onnode (err, val) {
     if (err) return cb(err)
-    const node = Node.decode(val)
+    const node = Node.decode(val, seq)
     cb(null, node)
   }
 }
