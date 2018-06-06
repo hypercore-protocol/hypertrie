@@ -432,9 +432,9 @@ tape('createWriteStream pipe', function (t) {
   reader.pipe(writer)
   writer.on('finish', function (err) {
     t.error(err, 'no error')
-    same('foo1', '1')
-    same('foo50', '50')
-    same('foo999', '999')
+    same('foo1', 1)
+    same('foo50', 50)
+    same('foo999', 999)
   })
 
   function same (key, val) {
@@ -444,27 +444,6 @@ tape('createWriteStream pipe', function (t) {
       t.same(node.value, val)
     })
   }
-})
-
-tape('create with precreated keypair', function (t) {
-  var crypto = require('hypercore/lib/crypto')
-  var keyPair = crypto.keyPair()
-
-  var db = create(keyPair.publicKey, {secretKey: keyPair.secretKey})
-  db.put('hello', 'world', function (err, node) {
-    t.same(node.value, 'world')
-    t.error(err, 'no error')
-    t.same(db.key, keyPair.publicKey, 'pubkey matches')
-    db.source._storage.secretKey.read(0, keyPair.secretKey.length, function (err, secretKey) {
-      t.error(err, 'no error')
-      t.same(secretKey, keyPair.secretKey, 'secret key is stored')
-    })
-    db.get('hello', function (err, node) {
-      t.error(err, 'no error')
-      t.same(node.value, 'world', 'same value')
-      t.end()
-    })
-  })
 })
 
 tape('can insert falsy values', function (t) {

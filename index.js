@@ -3,10 +3,13 @@ const Get = require('./lib/get')
 const Put = require('./lib/put')
 const Batch = require('./lib/batch')
 const History = require('./lib/history')
+const Iterator = require('./lib/iterator')
 const { Header } = require('./lib/messages')
 const mutexify = require('mutexify')
 const thunky = require('thunky')
 const codecs = require('codecs')
+const bulk = require('bulk-write-stream')
+const toStream = require('nanoiterator/to-stream')
 
 module.exports = HyperTrie
 
@@ -60,21 +63,39 @@ HyperTrie.prototype.head = function (cb) {
   this.getBySeq(this.feed.length - 1, cb)
 }
 
+HyperTrie.prototype.iterator = function (opts) {
+  return new Iterator(this, opts)
+}
+
+HyperTrie.prototype.createReadStream = function (opts) {
+  return toStream(this.iterator(opts))
+}
+
+HyperTrie.prototype.createWriteStream = function (opts) {
+  const self = this
+  return bulk.obj(write)
+
+  function write (batch, cb) {
+    if (batch.length && Array.isArray(batch[0])) batch = flatten(batch)
+    self.batch(batch, cb)
+  }
+}
+
 HyperTrie.prototype.history = function (opts) {
-  return new History(this, null, opts)
+  return new History(this, opts)
 }
 
 HyperTrie.prototype.get = function (key, opts, cb) {
   if (typeof opts === 'function') return this.get(key, null, opts)
-  return new Get(this, null, key, opts, cb)
+  return new Get(this, key, opts, cb)
 }
 
 HyperTrie.prototype.batch = function (ops, cb) {
-  return new Batch(this, null, ops, cb || noop)
+  return new Batch(this, ops, cb || noop)
 }
 
 HyperTrie.prototype.put = function (key, value, cb) {
-  return new Put(this, null, key, value, null, cb || noop)
+  return new Put(this, key, value, null, cb || noop)
 }
 
 HyperTrie.prototype.getBySeq = function (seq, cb) {
@@ -95,4 +116,13 @@ function readyAndHead (self, cb) {
     if (err) return cb(err)
     self.head(cb)
   })
+}
+
+function flatten (list) {
+  const result = []
+  for (var i = 0; i < list.length; i++) {
+    const next = list[i]
+    for (var j = 0; j < next.length; j++) result.push(next[j])
+  }
+  return result
 }
