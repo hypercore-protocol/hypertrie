@@ -1,11 +1,18 @@
 const hypertrie = require('./')
 const hypercore = require('hypercore')
+const ram = require('random-access-memory')
 
 const db = hypertrie(
-  hypercore('db')
+  hypercore(ram)
 )
 
-db.batch([{key: '#2', value: 'hiiiii'}], function () {
-  console.log('hi', db.feed.length)
-  db.get('#2', console.log)
+const batch = new Array(20)
+for (var i = 0; i < batch.length; i++) {
+  batch[i] = {key: '#' + i, value: '#' + i}
+}
+
+db.batch(batch, async function () {
+  for (var i = 0; i < 20; i++) {
+    db.get('#' + i, console.log)
+  }
 })
