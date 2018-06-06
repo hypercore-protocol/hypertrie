@@ -10,19 +10,21 @@ const thunky = require('thunky')
 const codecs = require('codecs')
 const bulk = require('bulk-write-stream')
 const toStream = require('nanoiterator/to-stream')
+const isOptions = require('is-options')
 
 module.exports = HyperTrie
 
 function HyperTrie (feed, opts) {
   if (!(this instanceof HyperTrie)) return new HyperTrie(feed, opts)
+  if (!opts) opts = {}
 
   this.feed = feed
   this.opened = false
-  this.valueEncoding = (opts && opts.valueEncoding) ? codecs(opts.valueEncoding) : null
+  this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.ready = thunky(this._ready.bind(this))
 
   this._checkout = (opts && opts.checkout) || 0
-  this.lock = mutexify()
+  this._lock = mutexify()
 }
 
 Object.defineProperty(HyperTrie.prototype, 'version', {
@@ -63,26 +65,21 @@ HyperTrie.prototype.head = function (cb) {
   this.getBySeq(this.feed.length - 1, cb)
 }
 
-HyperTrie.prototype.iterator = function (opts) {
-  return new Iterator(this, opts)
+HyperTrie.prototype.iterator = function (prefix, opts) {
+  if (isOptions(prefix)) return this.iterator('', prefix)
+  return new Iterator(this, prefix, opts)
 }
 
-HyperTrie.prototype.createReadStream = function (opts) {
-  return toStream(this.iterator(opts))
-}
-
-HyperTrie.prototype.createWriteStream = function (opts) {
-  const self = this
-  return bulk.obj(write)
-
-  function write (batch, cb) {
-    if (batch.length && Array.isArray(batch[0])) batch = flatten(batch)
-    self.batch(batch, cb)
-  }
+HyperTrie.prototype.createReadStream = function (prefix, opts) {
+  return toStream(this.iterator(prefix, opts))
 }
 
 HyperTrie.prototype.history = function (opts) {
   return new History(this, opts)
+}
+
+HyperTrie.prototype.createHistoryStream = function (opts) {
+  return toStream(this.history(opts))
 }
 
 HyperTrie.prototype.get = function (key, opts, cb) {
@@ -96,6 +93,16 @@ HyperTrie.prototype.batch = function (ops, cb) {
 
 HyperTrie.prototype.put = function (key, value, cb) {
   return new Put(this, key, value, null, cb || noop)
+}
+
+HyperTrie.prototype.createWriteStream = function (opts) {
+  const self = this
+  return bulk.obj(write)
+
+  function write (batch, cb) {
+    if (batch.length && Array.isArray(batch[0])) batch = flatten(batch)
+    self.batch(batch, cb)
+  }
 }
 
 HyperTrie.prototype.getBySeq = function (seq, cb) {
