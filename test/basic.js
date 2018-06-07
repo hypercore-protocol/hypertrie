@@ -1,9 +1,9 @@
-var tape = require('tape')
-var create = require('./helpers/create')
-var Readable = require('stream').Readable
+const tape = require('tape')
+const create = require('./helpers/create')
+const Readable = require('stream').Readable
 
 tape('basic put/get', function (t) {
-  var db = create()
+  const db = create()
   db.put('hello', 'world', function (err, node) {
     t.same(node.key, 'hello')
     t.same(node.value, 'world')
@@ -18,7 +18,7 @@ tape('basic put/get', function (t) {
 })
 
 tape('get on empty db', function (t) {
-  var db = create()
+  const db = create()
 
   db.get('hello', function (err, node) {
     t.error(err, 'no error')
@@ -28,7 +28,7 @@ tape('get on empty db', function (t) {
 })
 
 tape('not found', function (t) {
-  var db = create()
+  const db = create()
   db.put('hello', 'world', function (err) {
     t.error(err, 'no error')
     db.get('hej', function (err, node) {
@@ -41,7 +41,7 @@ tape('not found', function (t) {
 
 tape('leading / is ignored', function (t) {
   t.plan(7)
-  var db = create()
+  const db = create()
   db.put('/hello', 'world', function (err) {
     t.error(err, 'no error')
     db.get('/hello', function (err, node) {
@@ -60,7 +60,7 @@ tape('leading / is ignored', function (t) {
 tape('multiple put/get', function (t) {
   t.plan(8)
 
-  var db = create()
+  const db = create()
 
   db.put('hello', 'world', function (err) {
     t.error(err, 'no error')
@@ -81,7 +81,7 @@ tape('multiple put/get', function (t) {
 })
 
 tape('overwrites', function (t) {
-  var db = create()
+  const db = create()
 
   db.put('hello', 'world', function (err) {
     t.error(err, 'no error')
@@ -105,7 +105,7 @@ tape('overwrites', function (t) {
 tape('put/gets namespaces', function (t) {
   t.plan(8)
 
-  var db = create()
+  const db = create()
 
   db.put('hello/world', 'world', function (err) {
     t.error(err, 'no error')
@@ -128,7 +128,7 @@ tape('put/gets namespaces', function (t) {
 tape('put in tree', function (t) {
   t.plan(8)
 
-  var db = create()
+  const db = create()
 
   db.put('hello', 'a', function (err) {
     t.error(err, 'no error')
@@ -151,7 +151,7 @@ tape('put in tree', function (t) {
 tape('put in tree reverse order', function (t) {
   t.plan(8)
 
-  var db = create()
+  const db = create()
 
   db.put('hello/world', 'b', function (err) {
     t.error(err, 'no error')
@@ -174,7 +174,7 @@ tape('put in tree reverse order', function (t) {
 tape('multiple put in tree', function (t) {
   t.plan(13)
 
-  var db = create()
+  const db = create()
 
   db.put('hello/world', 'b', function (err) {
     t.error(err, 'no error')
@@ -206,8 +206,8 @@ tape('multiple put in tree', function (t) {
 })
 
 tape('insert 100 values and get them all', function (t) {
-  var db = create()
-  var max = 100
+  const db = create()
+  const max = 100
   var i = 0
 
   t.plan(3 * max)
@@ -238,7 +238,7 @@ tape('race works', async function (t) {
   t.plan(40)
 
   var missing = 10
-  var db = create()
+  const db = create()
 
   for (var i = 0; i < 10; i++) db.put('#' + i, '#' + i, done)
 
@@ -258,7 +258,7 @@ tape('race works', async function (t) {
 })
 
 tape('version', function (t) {
-  var db = create()
+  const db = create()
 
   db.ready(function () {
     t.same(db.version, 1)
@@ -278,7 +278,7 @@ tape('version', function (t) {
 tape('basic batch', function (t) {
   t.plan(1 + 3 + 3)
 
-  var db = create()
+  const db = create()
 
   db.batch([
     {key: 'hello', value: 'world'},
@@ -302,7 +302,7 @@ tape('basic batch', function (t) {
 tape('batch with del', function (t) {
   t.plan(1 + 1 + 3 + 2)
 
-  var db = create()
+  const db = create()
 
   db.batch([
     {key: 'hello', value: 'world'},
@@ -331,7 +331,7 @@ tape('batch with del', function (t) {
 tape('multiple batches', function (t) {
   t.plan(19)
 
-  var db = create()
+  const db = create()
 
   db.batch([{
     type: 'put',
@@ -415,10 +415,10 @@ tape('createWriteStream', function (t) {
 
 tape('createWriteStream pipe', function (t) {
   t.plan(10)
-  var db = create()
-  var writer = db.createWriteStream()
   var index = 0
-  var reader = new Readable({
+  const db = create()
+  const writer = db.createWriteStream()
+  const reader = new Readable({
     objectMode: true,
     read: function (size) {
       var value = (index < 1000) ? {
@@ -449,7 +449,7 @@ tape('createWriteStream pipe', function (t) {
 tape('can insert falsy values', function (t) {
   t.plan(2 * 2 + 3 + 1)
 
-  var db = create(null, {valueEncoding: 'json'})
+  const db = create(null, {valueEncoding: 'json'})
 
   db.put('hello', 0, function () {
     db.put('world', false, function () {
@@ -462,8 +462,8 @@ tape('can insert falsy values', function (t) {
         t.same(node && node.value, false)
       })
 
-      var ite = db.iterator()
-      var result = {}
+      const ite = db.iterator()
+      const result = {}
 
       ite.next(function loop (err, node) {
         t.error(err, 'no error')
@@ -483,7 +483,7 @@ tape('can insert falsy values', function (t) {
 tape('can put/get a null value', function (t) {
   t.plan(3)
 
-  var db = create(null, {valueEncoding: 'json'})
+  const db = create(null, {valueEncoding: 'json'})
   db.put('some key', null, function (err) {
     t.error(err, 'no error')
     db.get('some key', function (err, node) {

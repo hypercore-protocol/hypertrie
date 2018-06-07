@@ -66,6 +66,21 @@ HyperTrie.prototype.head = function (cb) {
   this.getBySeq(this.feed.length - 1, cb)
 }
 
+HyperTrie.prototype.list = function (prefix, opts, cb) {
+  if (typeof prefix === 'function') return this.list('', null, prefix)
+  if (typeof opts === 'function') return this.list(prefix, null, opts)
+
+  const ite = this.iterator(prefix, opts)
+  const res = []
+
+  ite.next(function loop (err, node) {
+    if (err) return cb(err)
+    if (!node) return cb(null, res)
+    res.push(node)
+    ite.next(loop)
+  })
+}
+
 HyperTrie.prototype.iterator = function (prefix, opts) {
   if (isOptions(prefix)) return this.iterator('', prefix)
   return new Iterator(this, prefix, opts)
