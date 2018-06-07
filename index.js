@@ -2,6 +2,7 @@ const Node = require('./lib/node')
 const Get = require('./lib/get')
 const Put = require('./lib/put')
 const Batch = require('./lib/batch')
+const Delete = require('./lib/del')
 const History = require('./lib/history')
 const Iterator = require('./lib/iterator')
 const { Header } = require('./lib/messages')
@@ -92,7 +93,11 @@ HyperTrie.prototype.batch = function (ops, cb) {
 }
 
 HyperTrie.prototype.put = function (key, value, cb) {
-  return new Put(this, key, value, null, cb || noop)
+  return new Put(this, key, value, null, 0, cb || noop)
+}
+
+HyperTrie.prototype.del = function (key, cb) {
+  return new Delete(this, key, cb)
 }
 
 HyperTrie.prototype.createWriteStream = function (opts) {
