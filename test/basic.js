@@ -265,7 +265,8 @@ tape('version', function (t) {
     db.put('hello', 'world', function () {
       t.same(db.version, 2)
       db.put('hello', 'verden', function () {
-        db.checkout(1).get('hello', function (err, node) {
+        t.same(db.version, 3)
+        db.checkout(2).get('hello', function (err, node) {
           t.error(err, 'no error')
           t.same(node.value, 'world')
           t.end()

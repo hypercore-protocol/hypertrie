@@ -16,6 +16,8 @@
     "varint": "^5.0.0"
   },
   "devDependencies": {
+    "compare": "^2.0.0",
+    "stream-collector": "^1.0.1",
     "tape": "^4.9.0"
   },
   "scripts": {

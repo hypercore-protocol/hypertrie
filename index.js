@@ -6,6 +6,7 @@ const Delete = require('./lib/del')
 const History = require('./lib/history')
 const Iterator = require('./lib/iterator')
 const Watch = require('./lib/watch')
+const Diff = require('./lib/diff')
 const { Header } = require('./lib/messages')
 const mutexify = require('mutexify')
 const thunky = require('thunky')
@@ -43,7 +44,7 @@ function HyperTrie (feed, opts) {
 Object.defineProperty(HyperTrie.prototype, 'version', {
   enumerable: true,
   get: function () {
-    return this.feed.length
+    return this._checkout || this.feed.length
   }
 })
 
@@ -58,6 +59,7 @@ HyperTrie.prototype._ready = function (cb) {
 
     function done (err) {
       if (err) return cb(err)
+      if (self._checkout === -1) self._checkout = self.feed.length
       self.key = self.feed.key
       self.discoveryKey = self.feed.discoveryKey
       self.opened = true
@@ -71,15 +73,20 @@ HyperTrie.prototype.replicate = function (opts) {
 }
 
 HyperTrie.prototype.checkout = function (version) {
+  if (version === 0) version = 1
   return new HyperTrie(this.feed, {
-    checkout: version || -1,
+    checkout: version || 1,
     valueEncoding: this.valueEncoding
   })
 }
 
+HyperTrie.prototype.snapshot = function () {
+  return this.checkout(this.version)
+}
+
 HyperTrie.prototype.head = function (cb) {
   if (!this.opened) return readyAndHead(this, cb)
-  if (this._checkout !== 0) return this.getBySeq(this._checkout, cb)
+  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, cb)
   if (this.feed.length < 2) return process.nextTick(cb, null, null)
   this.getBySeq(this.feed.length - 1, cb)
 }
@@ -116,6 +123,16 @@ HyperTrie.prototype.createHistoryStream = function (opts) {
   return toStream(this.history(opts))
 }
 
+HyperTrie.prototype.diff = function (other, prefix, opts) {
+  if (isOptions(prefix)) return this.diff(other, null, prefix)
+  const checkout = (typeof other === 'number' || !other) ? this.checkout(other) : other
+  return new Diff(this, checkout, prefix, opts)
+}
+
+HyperTrie.prototype.createDiffStream = function (other, prefix, opts) {
+  return toStream(this.diff(other, prefix, opts))
+}
+
 HyperTrie.prototype.get = function (key, opts, cb) {
   if (typeof opts === 'function') return this.get(key, null, opts)
   return new Get(this, key, opts, cb)
@@ -149,6 +166,8 @@ HyperTrie.prototype.createWriteStream = function (opts) {
 }
 
 HyperTrie.prototype.getBySeq = function (seq, cb) {
+  if (seq < 1) return process.nextTick(cb, null, null)
+
   const self = this
   this.feed.get(seq, onnode)
 
