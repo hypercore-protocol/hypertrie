@@ -32,13 +32,7 @@ function HyperTrie (feed, opts) {
   this._checkout = (opts && opts.checkout) || 0
   this._lock = mutexify()
 
-  const self = this
-
-  this.feed.on('append', function () {
-    for (var i = 0; i < self._watchers.length; i++) {
-      self._watchers[i].update()
-    }
-  })
+  this.feed.on('append', this._onappend.bind(this))
 }
 
 Object.defineProperty(HyperTrie.prototype, 'version', {
@@ -47,6 +41,12 @@ Object.defineProperty(HyperTrie.prototype, 'version', {
     return this._checkout || this.feed.length
   }
 })
+
+HyperTrie.prototype._onappend = function () {
+  for (var i = 0; i < this._watchers.length; i++) {
+    this._watchers[i].update()
+  }
+}
 
 HyperTrie.prototype._ready = function (cb) {
   const self = this
