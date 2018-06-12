@@ -152,7 +152,7 @@ HyperTrie.prototype.put = function (key, value, cb) {
 }
 
 HyperTrie.prototype.del = function (key, cb) {
-  return new Delete(this, key, cb)
+  return new Delete(this, key, null, cb)
 }
 
 HyperTrie.prototype.createWriteStream = function (opts) {
@@ -174,6 +174,8 @@ HyperTrie.prototype.getBySeq = function (seq, cb) {
   function onnode (err, val) {
     if (err) return cb(err)
     const node = Node.decode(val, seq, self.valueEncoding)
+    // early exit for the key: '' nodes we write to reset the db
+    if (!node.value && !node.key) return cb(null, null)
     cb(null, node)
   }
 }
