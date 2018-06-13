@@ -6,6 +6,8 @@ Distributed single writer key/value store
 npm install hypertrie
 ```
 
+[![Build Status](https://travis-ci.org/mafintosh/hypertrie.svg?branch=master)](https://travis-ci.org/mafintosh/hypertrie)
+
 Uses a rolling hash array mapped trie to index key/value data on top of a [hypercore](https://github.com/mafintosh/hypercore).
 
 Useful if you just want a straight forward single writer kv store or if you are looking for a building block for building more complex multiwriter databases on top.
