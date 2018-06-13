@@ -234,7 +234,7 @@ tape('insert 100 values and get them all', function (t) {
   }
 })
 
-tape('race works', async function (t) {
+tape('race works', function (t) {
   t.plan(40)
 
   var missing = 10
