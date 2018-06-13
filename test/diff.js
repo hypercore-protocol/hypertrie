@@ -23,7 +23,6 @@ tape('implicit checkout', function (t) {
     collect(rs, function (err, actual) {
       t.error(err, 'no error')
       t.equals(actual.length, 1)
-      t.equals(actual[0].type, 'del')
       t.equals(actual[0].key, 'a')
       t.equals(actual[0].left.key, 'a')
       t.equals(actual[0].left.value, '2')
@@ -44,7 +43,6 @@ tape('new value', function (t) {
       collect(rs, function (err, actual) {
         t.error(err, 'no error')
         t.equals(actual.length, 1)
-        t.equals(actual[0].type, 'del')
         t.equals(actual[0].key, 'a')
         t.equals(actual[0].left.value, '2')
         t.equals(actual[0].right, null)
@@ -66,11 +64,9 @@ tape('two new nodes', function (t) {
         t.error(err, 'no error')
         actual.sort(sort)
         t.equals(actual.length, 2)
-        t.equals(actual[0].type, 'del')
         t.equals(actual[0].key, 'a/bar')
         t.equals(actual[0].left.value, 'baz')
         t.equals(actual[0].right, null)
-        t.equals(actual[1].type, 'del')
         t.equals(actual[1].key, 'a/foo')
         t.equals(actual[1].left.value, 'quux')
         t.equals(actual[1].right, null)

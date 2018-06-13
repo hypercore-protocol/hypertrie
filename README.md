@@ -140,12 +140,14 @@ Returns a [nanoiterator](https://github.com/mafintosh/nanoiterator) that iterate
 
 ```js
 {
-  type: 'put' | 'del' | 'update',
   key: 'node-key-that-is-updated',
-  current: <current-node>,
-  checkout: <previous-node>
+  left: <node>,
+  right: <node>
 }
 ```
+
+If a node is in the current db but not in the version you are diffing against
+`left` will be set to the current node and `right` will be null and vice versa.
 
 #### `stream = db.createDiffStream(version, [prefix])`
 
