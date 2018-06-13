@@ -14,16 +14,27 @@ const codecs = require('codecs')
 const bulk = require('bulk-write-stream')
 const toStream = require('nanoiterator/to-stream')
 const isOptions = require('is-options')
+const hypercore = require('hypercore')
+const inherits = require('inherits')
+const events = require('events')
 
 module.exports = HyperTrie
 
-function HyperTrie (feed, opts) {
-  if (!(this instanceof HyperTrie)) return new HyperTrie(feed, opts)
+function HyperTrie (storage, key, opts) {
+  if (!(this instanceof HyperTrie)) return new HyperTrie(storage, key, opts)
+
+  if (isOptions(key)) {
+    opts = key
+    key = null
+  }
+
   if (!opts) opts = {}
+
+  events.EventEmitter.call(this)
 
   this.key = null
   this.discoveryKey = null
-  this.feed = feed
+  this.feed = opts.feed || hypercore(storage, key, {sparse: opts.sparse})
   this.opened = false
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.ready = thunky(this._ready.bind(this))
@@ -34,6 +45,8 @@ function HyperTrie (feed, opts) {
 
   this.feed.on('append', this._onappend.bind(this))
 }
+
+inherits(HyperTrie, events.EventEmitter)
 
 Object.defineProperty(HyperTrie.prototype, 'version', {
   enumerable: true,
@@ -46,6 +59,8 @@ HyperTrie.prototype._onappend = function () {
   for (var i = 0; i < this._watchers.length; i++) {
     this._watchers[i].update()
   }
+
+  this.emit('append')
 }
 
 HyperTrie.prototype._ready = function (cb) {
@@ -63,6 +78,7 @@ HyperTrie.prototype._ready = function (cb) {
       self.key = self.feed.key
       self.discoveryKey = self.feed.discoveryKey
       self.opened = true
+      self.emit('ready')
       cb(null)
     }
   })
@@ -74,9 +90,10 @@ HyperTrie.prototype.replicate = function (opts) {
 
 HyperTrie.prototype.checkout = function (version) {
   if (version === 0) version = 1
-  return new HyperTrie(this.feed, {
+  return new HyperTrie(null, null, {
     checkout: version || 1,
-    valueEncoding: this.valueEncoding
+    valueEncoding: this.valueEncoding,
+    feed: this.feed
   })
 }
 

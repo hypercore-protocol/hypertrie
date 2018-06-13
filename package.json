@@ -6,6 +6,7 @@
   "dependencies": {
     "bulk-write-stream": "^1.1.4",
     "codecs": "^1.2.1",
+    "hypercore": "^6.15.0",
     "inherits": "^2.0.3",
     "is-options": "^1.0.1",
     "mutexify": "^1.2.0",
@@ -13,6 +14,7 @@
     "protocol-buffers-encodings": "^1.1.0",
     "sodium-universal": "^2.0.0",
     "thunky": "^1.0.2",
+    "unordered-set": "^2.0.1",
     "varint": "^5.0.0"
   },
   "devDependencies": {

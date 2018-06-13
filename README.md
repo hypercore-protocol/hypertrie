@@ -23,7 +23,7 @@ db.put('hello', 'world', function () {
 
 ## API
 
-#### `db = hypertrie(storage, [options])`
+#### `db = hypertrie(storage, [key], [options])`
 
 Create a new database. Options include:
 
@@ -68,9 +68,29 @@ Watch a prefix of the db and get notified when it changes.
 When there is a change `watcher.on('change')` is emitted.
 Use `watcher.destroy()` to stop watching.
 
-#### `version = db.version`
+#### `db.on('ready')`
+
+Emitted when the db has loaded it's internal state.
+
+You do not need to wait for this unless noted in the docs.
+
+#### `db.version`
 
 Returns the current version of the db (an incrementing integer).
+
+Only available after `ready` has been emitted.
+
+#### `db.key`
+
+Returns the db public key. You need to pass this to other instances
+you want to replicate with.
+
+Only available after `ready` has been emitted.
+
+#### `db.discoveryKey`
+
+Returns the db discovery key. Can be used to find other db peers.
+
 Only available after `ready` has been emitted.
 
 #### `checkoutDb = db.checkout(version)`
