@@ -88,7 +88,7 @@ tape('two prefixes with same siphash (iterator)', function (t) {
   })
 })
 
-tape.only('two prefixes with same key', function (t) {
+tape('two prefixes with same key', function (t) {
   const db = create()
 
   db.put('idgcmnmna/a', 'a', function () {
