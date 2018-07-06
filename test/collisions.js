@@ -87,3 +87,23 @@ tape('two prefixes with same siphash (iterator)', function (t) {
     })
   })
 })
+
+tape.only('two prefixes with same key', function (t) {
+  const db = create()
+
+  db.put('idgcmnmna/a', 'a', function () {
+    db.put('mpomeiehc/a', 'a', function () {
+      const ite = db.iterator({recursive: false})
+
+      ite.next(function (err, node) {
+        t.error(err, 'no error')
+        t.same(node.value, 'a')
+      })
+      ite.next(function (err, node) {
+        t.error(err, 'no error')
+        t.same(node.value, 'a')
+        t.end()
+      })
+    })
+  })
+})
