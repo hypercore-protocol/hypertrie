@@ -107,3 +107,37 @@ tape('two prefixes with same key', function (t) {
     })
   })
 })
+
+tape('sorts based on key when colliding', function (t) {
+  const db1 = create()
+  const db2 = create()
+
+  db1.batch([
+    {key: 'idgcmnmna'},
+    {key: 'mpomeiehc'},
+    {key: 'a'},
+    {key: 'b'},
+    {key: 'c'}
+  ], function () {
+    db2.batch([
+      {key: 'b'},
+      {key: 'mpomeiehc'},
+      {key: 'a'},
+      {key: 'idgcmnmna'},
+      {key: 'c'}
+    ], function () {
+      const i1 = db1.iterator()
+      const i2 = db2.iterator()
+
+      i1.next(function loop (err, n1) {
+        t.error(err, 'no error')
+        i2.next(function (err, n2) {
+          t.error(err, 'no error')
+          if (!n1 && !n2) return t.end()
+          t.same(n1.key, n2.key)
+          i1.next(loop)
+        })
+      })
+    })
+  })
+})
