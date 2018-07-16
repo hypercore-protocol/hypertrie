@@ -141,3 +141,34 @@ tape('sorts based on key when colliding', function (t) {
     })
   })
 })
+
+tape('two keys with same siphash (diff)', function (t) {
+  const db = create()
+
+  db.batch([
+    {key: 'idgcmnmna'},
+    {key: 'mpomeiehc'},
+    {key: 'a'},
+    {key: 'b'},
+    {key: 'c'}
+  ], function () {
+    const ite = db.diff(0)
+    const found = {}
+
+    ite.next(function loop (err, node) {
+      t.error(err, 'no error')
+      if (!node) {
+        t.same(found, {
+          idgcmnmna: true,
+          mpomeiehc: true,
+          a: true,
+          b: true,
+          c: true
+        })
+        return t.end()
+      }
+      found[node.key] = true
+      ite.next(loop)
+    })
+  })
+})
