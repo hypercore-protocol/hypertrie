@@ -8,6 +8,7 @@
     "codecs": "^1.2.1",
     "hypercore": "^6.15.0",
     "inherits": "^2.0.3",
+    "inspect-custom-symbol": "^1.1.0",
     "is-options": "^1.0.1",
     "mutexify": "^1.2.0",
     "nanoiterator": "^1.2.0",
