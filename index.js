@@ -34,6 +34,7 @@ function HyperTrie (storage, key, opts) {
 
   this.key = null
   this.discoveryKey = null
+  this.metadata = opts.metadata || null
   this.feed = opts.feed || hypercore(storage, key, {sparse: opts.sparse})
   this.opened = false
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
@@ -70,7 +71,7 @@ HyperTrie.prototype._ready = function (cb) {
     if (err) return done(err)
 
     if (self.feed.length || !self.feed.writable) return done(null)
-    self.feed.append(Header.encode({protocol: 'hypertrie'}), done)
+    self.feed.append(Header.encode({type: 'hypertrie', metadata: self.metadata}), done)
 
     function done (err) {
       if (err) return cb(err)

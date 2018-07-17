@@ -1,5 +1,10 @@
 message Header {
-  required string protocol = 1;
+  required string type = 1;
+  optional Metadata metadata = 2;
+}
+
+message Metadata {
+  optional bytes contentFeed = 1;
 }
 
 message Node {
