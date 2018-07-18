@@ -44,7 +44,7 @@ function HyperTrie (storage, key, opts) {
   this._checkout = (opts && opts.checkout) || 0
   this._lock = mutexify()
 
-  this.feed.on('append', this._onappend.bind(this))
+  if (!this._checkout) this.feed.on('append', this._onappend.bind(this))
 }
 
 inherits(HyperTrie, events.EventEmitter)
