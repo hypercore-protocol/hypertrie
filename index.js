@@ -35,7 +35,11 @@ function HyperTrie (storage, key, opts) {
   this.key = null
   this.discoveryKey = null
   this.metadata = opts.metadata || null
-  this.feed = opts.feed || hypercore(storage, key, {sparse: opts.sparse})
+  this.feed = opts.feed || hypercore(storage, key, {
+    sparse: opts.sparse,
+    maxRequests: opts.maxRequests
+    // TODO: pass everthing *except* for valueEncoding
+  })
   this.opened = false
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.ready = thunky(this._ready.bind(this))
@@ -185,7 +189,6 @@ HyperTrie.prototype.createWriteStream = function (opts) {
 
 HyperTrie.prototype.getBySeq = function (seq, cb) {
   if (seq < 1) return process.nextTick(cb, null, null)
-
   const self = this
   this.feed.get(seq, onnode)
 
