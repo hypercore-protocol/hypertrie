@@ -38,9 +38,10 @@ Create a new database. Options include:
 
 If you set `options.feed` then you can set `storage` to null.
 
-#### `db.get(key, callback)`
+#### `db.get(key, [options], callback)`
 
 Lookup a key. Returns a result node if found or `null` otherwise.
+Options are passed through to hypercore's get method.
 
 #### `db.put(key, value, [callback])`
 
@@ -123,6 +124,8 @@ Options include:
 ```
 
 If you set `recursive: false` it will only iterate the immediate children (similar to readdir)
+
+Additional options are passed through to hypercore's get method.
 
 #### `stream = db.createReadStream(prefix, [options])`
 
