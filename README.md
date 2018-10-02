@@ -125,7 +125,7 @@ Options include:
 
 If you set `recursive: false` it will only iterate the immediate children (similar to readdir)
 
-Addition options are passed through to hypercore's get method.
+Additional options are passed through to hypercore's get method.
 
 #### `stream = db.createReadStream(prefix, [options])`
 
