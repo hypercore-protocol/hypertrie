@@ -156,7 +156,7 @@ Options include:
 
 Same as above but as a stream
 
-#### `ite = db.diff(version, [prefix])`
+#### `ite = db.diff(version, [prefix], [options])`
 
 Returns a [nanoiterator](https://github.com/mafintosh/nanoiterator) that iterates the diff between the current db and the version you specifiy. The objects returned look like this
 
@@ -170,6 +170,15 @@ Returns a [nanoiterator](https://github.com/mafintosh/nanoiterator) that iterate
 
 If a node is in the current db but not in the version you are diffing against
 `left` will be set to the current node and `right` will be null and vice versa.
+
+Options include:
+
+```js
+{
+  skipLeftNull: false,
+  skipRightNull: false
+}
+```
 
 #### `stream = db.createDiffStream(version, [prefix])`
 
