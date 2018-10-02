@@ -187,10 +187,12 @@ HyperTrie.prototype.createWriteStream = function (opts) {
   }
 }
 
-HyperTrie.prototype.getBySeq = function (seq, cb) {
+HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
+  if (typeof opts === 'function') return this.getBySeq(seq, null, opts)
   if (seq < 1) return process.nextTick(cb, null, null)
+
   const self = this
-  this.feed.get(seq, onnode)
+  this.feed.get(seq, opts, onnode)
 
   function onnode (err, val) {
     if (err) return cb(err)
