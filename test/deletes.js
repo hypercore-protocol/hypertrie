@@ -1,6 +1,8 @@
 const tape = require('tape')
 const create = require('./helpers/create')
 
+const messages = require('../lib/messages')
+
 tape('basic delete', function (t) {
   const db = create()
 
@@ -127,6 +129,22 @@ tape('delete many in many (iteration)', function (t) {
       ite.next(loop)
     })
   }
+})
+
+tape('deletion with a single record, and a valueEncoding', function (t) {
+  const db = create(null, { valueEncoding: messages.Header })
+
+  db.put('hello', { type: 'some-type' }, function (err) {
+    t.error(err, 'no error')
+    db.del('hello', function (err) {
+      t.error(err, 'no error')
+      db.get('hello', function (err, val) {
+        t.error(err, 'no error')
+        t.same(val, null)
+        t.end()
+      })
+    })
+  })
 })
 
 function toDel (e) {
