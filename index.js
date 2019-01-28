@@ -35,13 +35,12 @@ function HyperTrie (storage, key, opts) {
   this.key = null
   this.discoveryKey = null
   this.metadata = opts.metadata || null
+  this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.feed = opts.feed || hypercore(storage, key, {
-    sparse: opts.sparse,
-    maxRequests: opts.maxRequests
-    // TODO: pass everthing *except* for valueEncoding
+    ...opts,
+    valueEncoding: 'binary'
   })
   this.opened = false
-  this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.ready = thunky(this._ready.bind(this))
 
   this._watchers = []
@@ -87,6 +86,20 @@ HyperTrie.prototype._ready = function (cb) {
       cb(null)
     }
   })
+}
+
+HyperTrie.prototype.getMetadata = function (cb) {
+  const self = this
+
+  this.feed.ready(function (err) {
+    if (err) return cb(err)
+    self.feed.get(0, { valueEncoding: Header }, done)
+  })
+
+  function done (err, header) {
+    if (err) return cb(err)
+    return cb(null, header.metadata)
+  }
 }
 
 HyperTrie.prototype.replicate = function (opts) {

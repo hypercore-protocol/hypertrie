@@ -1,10 +1,6 @@
 message Header {
   required string type = 1;
-  optional Metadata metadata = 2;
-}
-
-message Metadata {
-  optional bytes contentFeed = 1;
+  optional bytes metadata = 2;
 }
 
 message Node {
