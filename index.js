@@ -36,10 +36,9 @@ function HyperTrie (storage, key, opts) {
   this.discoveryKey = null
   this.metadata = opts.metadata || null
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
-  this.feed = opts.feed || hypercore(storage, key, {
-    ...opts,
-    valueEncoding: 'binary'
-  })
+
+  var feedOpts = Object.assign({}, opts, { valueEncoding: 'binary' })
+  this.feed = opts.feed || hypercore(storage, key, feedOpts)
   this.opened = false
   this.ready = thunky(this._ready.bind(this))
 
