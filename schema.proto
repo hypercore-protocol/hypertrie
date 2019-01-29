@@ -1,3 +1,4 @@
+// The Header is DEP-0007 compatible.
 message Header {
   required string type = 1;
   optional bytes metadata = 2;
