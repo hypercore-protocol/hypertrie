@@ -493,3 +493,18 @@ tape('can put/get a null value', function (t) {
     })
   })
 })
+
+tape('can create with metadata', function (t) {
+  const db = create(null, {
+    valueEncoding: 'json',
+    metadata: 'A piece of metadata'
+  })
+  db.ready(function (err) {
+    t.error(err, 'no error')
+    db.getMetadata(function (err, metadata) {
+      t.error(err, 'no error')
+      t.same(metadata, Buffer.from('A piece of metadata'))
+      t.end()
+    })
+  })
+})
