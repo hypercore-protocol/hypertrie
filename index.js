@@ -169,12 +169,21 @@ HyperTrie.prototype.batch = function (ops, cb) {
   return new Batch(this, ops, cb || noop)
 }
 
-HyperTrie.prototype.put = function (key, value, cb) {
-  return new Put(this, key, value, null, 0, cb || noop)
+HyperTrie.prototype.put = function (key, value, opts, cb) {
+  if (typeof opts === 'function') return this.put(key, value, null, opts)
+  opts = Object.assign({}, opts, {
+    batch: null,
+    del: 0
+  })
+  return new Put(this, key, value, opts, cb || noop)
 }
 
-HyperTrie.prototype.del = function (key, cb) {
-  return new Delete(this, key, null, cb)
+HyperTrie.prototype.del = function (key, opts, cb) {
+  if (typeof opts === 'function') return this.del(key, null, opts)
+  opts = Object.assign({}, opts, {
+    batch: null
+  })
+  return new Delete(this, key, opts, cb)
 }
 
 HyperTrie.prototype.createWriteStream = function (opts) {
