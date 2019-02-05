@@ -62,7 +62,15 @@ tape('condition: two keys with same siphash', function (t) {
     db.put('mpomeiehc', 'b', { condition: onlyIfNull }, function (err) {
       t.error(err, 'no error')
       t.same(db.version, 3)
-      t.end()
+      db.get('mpomeiehc', function (err, node) {
+        t.error(err, 'no error')
+        t.same(node.value, 'b')
+        db.get('idgcmnmna', function (err, node) {
+          t.error(err, 'no error')
+          t.same(node.value, 'a')
+          t.end()
+        })
+      })
     })
   })
 
