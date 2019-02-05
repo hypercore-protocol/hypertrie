@@ -69,7 +69,7 @@ Options can include:
   condition: function (oldNode, cb(err, bool)) { ... }
 }
 ```
-The optional `condition` function behaves the same as the one in `put`, minus the `newNode` parameter (since this is a deletion).
+The optional `condition` function behaves the same as the one in `put`, minus the `newNode` parameter.
 
 #### `db.batch(batch, [callback])`
 
