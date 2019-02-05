@@ -43,13 +43,33 @@ If you set `options.feed` then you can set `storage` to null.
 Lookup a key. Returns a result node if found or `null` otherwise.
 Options are passed through to hypercore's get method.
 
-#### `db.put(key, value, [callback])`
+#### `db.put(key, value, [options], [callback])`
 
 Insert a value
 
-#### `db.del(key, [callback])`
+Options can include:
+```js
+{
+  condition: function (oldNode, newNode, cb(err, bool)) { ... } 
+}
+```
+The optional `condition` function provides atomic compare-and-swap semantics, allowing you to optionally abort a put based on the current and intended node values.
+The condition callback should be used as follows:
+1. `cb(new Error(...))`: Abort with an error that will be forwarded through the `put`.
+2. `cb(null, false)`: Abort the put, but do not produce an error.
+3. `cb(null, true)`: Proceed with the put.
+
+#### `db.del(key, [options], [callback])`
 
 Delete a key from the database.
+
+Options can include:
+```js
+{
+  condition: function (oldNode, cb(err, bool)) { ... }
+}
+```
+The optional `condition` function behaves the same as the one in `put`, minus the `newNode` parameter (since this is a deletion).
 
 #### `db.batch(batch, [callback])`
 
