@@ -38,6 +38,62 @@ tape('condition: put only if the value is null', function (t) {
   }
 })
 
+tape('condition: put only if value is null, nested paths', function (t) {
+  const db = create()
+  db.put('/a/b', 'world', { condition: onlyIfNull }, err => {
+    t.error(err, 'no error')
+    db.put('/a/b/c', 'friend', { condition: onlyIfNull }, err => {
+      t.error(err, 'no error')
+      t.same(db.version, 3)
+      t.end()
+    })
+  })
+
+  function onlyIfNull (oldNode, newNode, cb) {
+    if (!newNode) return cb(new Error('Cannot insert a null value (use delete)'))
+    if (oldNode) return cb(null, false)
+    return cb(null, true)
+  }
+})
+
+tape('condition: two keys with same siphash', function (t) {
+  const db = create()
+  var pending = 2
+
+  db.put('idgcmnmna', 'a', function () {
+    db.put('mpomeiehc', 'b', { condition: onlyIfNull }, function (err) {
+      t.error(err, 'no error')
+      t.same(db.version, 3)
+      testKey('idgcmnmna', ifValueMatches('a'))
+      testKey('mpomeiehc', ifValueMatches('b'))
+    })
+  })
+
+  function testKey (key, condition) {
+    db.put(key, 'c', { condition }, function (err) {
+      t.error(err, 'no error')
+      db.get(key, function (err, node) {
+        t.error(err, 'no error')
+        t.same(node.value, 'c')
+        if (!--pending) return t.end()
+      })
+    })
+  }
+
+  function ifValueMatches (val) {
+    return function (oldNode, newNode, cb) {
+      if (oldNode && oldNode.value === val) return cb(null, true)
+      return cb(null, false)
+    }
+  }
+
+  function onlyIfNull (oldNode, newNode, cb) {
+    if (!newNode) return cb(new Error('Cannot insert a null value (use delete)'))
+    if (oldNode) return cb(null, false)
+    return cb(null, true)
+  }
+})
+
 tape('condition: delete only a certain value', function (t) {
   const db = create()
   db.put('hello', 'world', err => {
@@ -57,7 +113,7 @@ tape('condition: delete only a certain value', function (t) {
       t.error(err, 'no error')
       db.get('hello', (err, node) => {
         t.error(err, 'no error')
-        t.same(node, null)
+        t.true(node === null)
         t.end()
       })
     })
@@ -65,7 +121,7 @@ tape('condition: delete only a certain value', function (t) {
 
   function deleteGuard (value) {
     return function (node, cb) {
-      if (node === value) return cb(null, true)
+      if (node && node.value === value) return cb(null, true)
       return cb(null, false)
     }
   }
