@@ -48,7 +48,7 @@ Options are passed through to hypercore's get method.
 Insert a value.
 
 Options can include:
-```js
+```
 {
   condition: function (oldNode, newNode, cb(err, bool)) { ... } 
 }
@@ -64,7 +64,7 @@ The condition callback should be used as follows:
 Delete a key from the database.
 
 Options can include:
-```js
+```
 {
   condition: function (oldNode, cb(err, bool)) { ... }
 }
