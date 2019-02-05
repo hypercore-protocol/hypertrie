@@ -45,7 +45,7 @@ Options are passed through to hypercore's get method.
 
 #### `db.put(key, value, [options], [callback])`
 
-Insert a value
+Insert a value.
 
 Options can include:
 ```js
