@@ -58,21 +58,34 @@ tape('condition: put only if value is null, nested paths', function (t) {
 
 tape('condition: two keys with same siphash', function (t) {
   const db = create()
+  var pending = 2
+
   db.put('idgcmnmna', 'a', function () {
     db.put('mpomeiehc', 'b', { condition: onlyIfNull }, function (err) {
       t.error(err, 'no error')
       t.same(db.version, 3)
-      db.get('mpomeiehc', function (err, node) {
-        t.error(err, 'no error')
-        t.same(node.value, 'b')
-        db.get('idgcmnmna', function (err, node) {
-          t.error(err, 'no error')
-          t.same(node.value, 'a')
-          t.end()
-        })
-      })
+      testKey('idgcmnmna', ifValueMatches('a'))
+      testKey('mpomeiehc', ifValueMatches('b'))
     })
   })
+
+  function testKey (key, condition) {
+    db.put(key, 'c', { condition }, function (err) {
+      t.error(err, 'no error')
+      db.get(key, function (err, node) {
+        t.error(err, 'no error')
+        t.same(node.value, 'c')
+        if (!--pending) return t.end()
+      })
+    })
+  }
+
+  function ifValueMatches (val) {
+    return function (oldNode, newNode, cb) {
+      if (oldNode && oldNode.value === val) return cb(null, true)
+      return cb(null, false)
+    }
+  }
 
   function onlyIfNull (oldNode, newNode, cb) {
     if (!newNode) return cb(new Error('Cannot insert a null value (use delete)'))
