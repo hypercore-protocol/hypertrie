@@ -111,11 +111,13 @@ HyperTrie.prototype.snapshot = function () {
   return this.checkout(this.version)
 }
 
-HyperTrie.prototype.head = function (cb) {
-  if (!this.opened) return readyAndHead(this, cb)
-  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, cb)
+HyperTrie.prototype.head = function (opts, cb) {
+  if (typeof opts === 'function') return this.head(null, opts)
+
+  if (!this.opened) return readyAndHead(this, opts, cb)
+  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, opts, cb)
   if (this.feed.length < 2) return process.nextTick(cb, null, null)
-  this.getBySeq(this.feed.length - 1, cb)
+  this.getBySeq(this.feed.length - 1, opts, cb)
 }
 
 HyperTrie.prototype.list = function (prefix, opts, cb) {
@@ -206,11 +208,11 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
   if (seq < 1) return process.nextTick(cb, null, null)
 
   const self = this
-  this.feed.get(seq, opts, onnode)
+  this.feed.get(seq, { ...opts, valueEncoding: 'binary' }, onnode)
 
   function onnode (err, val) {
     if (err) return cb(err)
-    const node = Node.decode(val, seq, self.valueEncoding)
+    const node = Node.decode(val, seq, (opts && opts.valueEncoding) || self.valueEncoding)
     // early exit for the key: '' nodes we write to reset the db
     if (!node.value && !node.key) return cb(null, null)
     cb(null, node)
@@ -219,10 +221,10 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
 
 function noop () {}
 
-function readyAndHead (self, cb) {
+function readyAndHead (self, opts, cb) {
   self.ready(function (err) {
     if (err) return cb(err)
-    self.head(cb)
+    self.head(opts, cb)
   })
 }
 

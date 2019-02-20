@@ -1,6 +1,8 @@
 const tape = require('tape')
-const create = require('./helpers/create')
+const codecs = require('codecs')
 const Readable = require('stream').Readable
+
+const create = require('./helpers/create')
 
 tape('basic put/get', function (t) {
   const db = create()
@@ -504,6 +506,56 @@ tape('can create with metadata', function (t) {
     db.getMetadata(function (err, metadata) {
       t.error(err, 'no error')
       t.same(metadata, Buffer.from('A piece of metadata'))
+      t.end()
+    })
+  })
+})
+
+tape('can override valueEncoding on get', function (t) {
+  const db = create({ valueEncoding: 'binary' })
+  let encoded = codecs('json').encode({ name: 'me' })
+  db.put('hello', encoded, function (err, node) {
+    t.error(err, 'no error')
+    t.same(node.key, 'hello', 'same key')
+    t.same(node.value, encoded)
+    t.error(err, 'no error')
+    db.get('hello', { valueEncoding: 'json' }, function (err, node) {
+      t.error(err, 'no error')
+      t.same(node.key, 'hello', 'same key')
+      t.same(node.value.name, 'me', 'same value')
+      t.end()
+    })
+  })
+})
+
+tape('can override valueEncoding on put', function (t) {
+  const db = create({ valueEncoding: 'binary' })
+  db.put('hello', { hello: 'world' }, { valueEncoding: 'json' }, function (err, node) {
+    t.error(err, 'no error')
+    t.same(node.key, 'hello', 'same key')
+    t.same(node.value.hello, 'world')
+    t.error(err, 'no error')
+    db.get('hello', function (err, node) {
+      t.error(err, 'no error')
+      t.same(node.key, 'hello', 'same key')
+      t.true(node.value instanceof Buffer)
+      t.same(codecs('json').decode(node.value).hello, 'world')
+      t.end()
+    })
+  })
+})
+
+tape('can override valueEncoding on batch', function (t) {
+  const db = create({ valueEncoding: 'binary' })
+  db.batch([
+    { type: 'put', key: 'hello', value: { hello: 'world' }, valueEncoding: 'json' }
+  ], function (err) {
+    t.error(err, 'no error')
+    db.get('hello', function (err, node) {
+      t.error(err, 'no error')
+      t.same(node.key, 'hello', 'same key')
+      t.true(node.value instanceof Buffer)
+      t.same(codecs('json').decode(node.value).hello, 'world')
       t.end()
     })
   })
