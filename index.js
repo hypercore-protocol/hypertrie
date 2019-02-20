@@ -208,7 +208,7 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
   if (seq < 1) return process.nextTick(cb, null, null)
 
   const self = this
-  this.feed.get(seq, { ...opts, valueEncoding: 'binary' }, onnode)
+  this.feed.get(seq, Object.assign({}, opts, { valueEncoding: 'binary' }), onnode)
 
   function onnode (err, val) {
     if (err) return cb(err)
