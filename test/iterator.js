@@ -103,6 +103,22 @@ tape('non recursive iteration', function (t) {
   })
 })
 
+tape.only('non recursive iteration, with /', function (t) {
+  const db = create()
+  const vals = [
+    'hello/world'
+  ]
+  put(db, vals, function (err) {
+    t.error(err, 'no error')
+    all(db.iterator({ recursive: false }), function (err, map) {
+      t.error(err, 'no error')
+      console.log('map:', map)
+      t.false(map['hello/world'], 'key should not be present')
+      t.end()
+    })
+  })
+})
+
 tape('mixed nested and non nexted iteration', function (t) {
   const db = create()
   const vals = ['a', 'a/a', 'a/b', 'a/c', 'a/a/a', 'a/a/b', 'a/a/c']
