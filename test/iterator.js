@@ -103,7 +103,7 @@ tape('non recursive iteration', function (t) {
   })
 })
 
-tape.only('non recursive iteration, with /', function (t) {
+tape('non recursive iteration, with /', function (t) {
   const db = create()
   const vals = [
     'hello/world'
@@ -112,7 +112,6 @@ tape.only('non recursive iteration, with /', function (t) {
     t.error(err, 'no error')
     all(db.iterator({ recursive: false }), function (err, map) {
       t.error(err, 'no error')
-      console.log('map:', map)
       t.false(map['hello/world'], 'key should not be present')
       t.end()
     })
