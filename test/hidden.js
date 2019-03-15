@@ -117,7 +117,6 @@ tape('hidden deletes', function (t) {
           t.same(node.value, 'b')
         })
         db.get('a', { hidden: true }, function (err, node) {
-          console.log(node)
           t.error(err, 'no error')
           t.same(node, null)
         })
