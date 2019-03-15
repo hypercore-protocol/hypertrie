@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "bulk-write-stream": "^1.1.4",
-    "codecs": "^1.2.1",
+    "codecs": "^2.0.0",
     "hypercore": "^6.15.0",
     "inherits": "^2.0.3",
     "inspect-custom-symbol": "^1.1.0",
