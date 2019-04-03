@@ -46,6 +46,7 @@ function HyperTrie (storage, key, opts) {
   this._checkout = (opts && opts.checkout) || 0
   this._lock = mutexify()
 
+  if (this.feed !== opts.feed) this.feed.on('error', this._onerror.bind(this))
   if (!this._checkout) this.feed.on('append', this._onappend.bind(this))
 }
 
@@ -57,6 +58,10 @@ Object.defineProperty(HyperTrie.prototype, 'version', {
     return this._checkout || this.feed.length
   }
 })
+
+HyperTrie.prototype._onerror = function (err) {
+  this.emit('error', err)
+}
 
 HyperTrie.prototype._onappend = function () {
   for (var i = 0; i < this._watchers.length; i++) {
