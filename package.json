@@ -6,7 +6,7 @@
   "dependencies": {
     "bulk-write-stream": "^1.1.4",
     "codecs": "^2.0.0",
-    "hypercore": "^6.15.0",
+    "hypercore": "^7.0.0",
     "inherits": "^2.0.3",
     "inspect-custom-symbol": "^1.1.0",
     "is-options": "^1.0.1",
