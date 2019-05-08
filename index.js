@@ -99,6 +99,12 @@ HyperTrie.prototype.getMetadata = function (cb) {
   })
 }
 
+HyperTrie.prototype.setMetadata = function (metadata) {
+  // setMetadata can only be called before this.ready is first called.
+  if (this.feed.length || !this.feed.writable) throw new Error('The metadata must be set before any puts have occurred.')
+  this.metadata = metadata
+}
+
 HyperTrie.prototype.replicate = function (opts) {
   return this.feed.replicate(opts)
 }

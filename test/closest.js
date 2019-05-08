@@ -45,4 +45,17 @@ tape('closest put node is a prefix, batch insertion with flags', function (t) {
   })
 })
 
-// TODO: A test with a trie with one hidden entry, then do closest
+tape('closest node with one hidden node', function (t) {
+  t.plan(3)
+
+  const db = create()
+
+  db.put('a', 'hello', { hidden: true }, err => {
+    t.error(err, 'no error')
+    db.get('b', { closest: true }, (err, node) => {
+      console.log('node:', node)
+      t.error(err, 'no error')
+      t.false(node)
+    })
+  })
+})
