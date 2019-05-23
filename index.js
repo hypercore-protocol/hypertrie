@@ -83,8 +83,10 @@ HyperTrie.prototype._ready = function (cb) {
     function done (err) {
       if (err) return cb(err)
       if (self._checkout === -1) self._checkout = self.feed.length
+      self.id = self.feed.id
       self.key = self.feed.key
       self.discoveryKey = self.feed.discoveryKey
+      self.secretKey = self.feed.secretKey
       self.opened = true
       self.emit('ready')
       cb(null)
