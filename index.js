@@ -32,8 +32,10 @@ function HyperTrie (storage, key, opts) {
 
   events.EventEmitter.call(this)
 
+  this.id = null
   this.key = null
   this.discoveryKey = null
+  this.secretKey = null
   this.metadata = opts.metadata || null
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
 
