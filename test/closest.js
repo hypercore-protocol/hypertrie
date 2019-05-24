@@ -45,7 +45,7 @@ tape('closest put node is a prefix, batch insertion with flags', function (t) {
   })
 })
 
-tape.only('closest node to non-existing delete path is a prefix', function (t) {
+tape('closest node to non-existing delete path is a prefix', function (t) {
   t.plan(4)
 
   const db = create()
@@ -55,7 +55,7 @@ tape.only('closest node to non-existing delete path is a prefix', function (t) {
     { type: 'put', key: 'b', value: 'goodbye' },
     { type: 'put', key: 'a/a', value: 'world' },
     { type: 'put', key: 'b/a', value: 'dog' },
-    { type: 'put', key: 'b/b', value: 'otter' },
+    { type: 'put', key: 'b/b', value: 'otter' }
   ], err => {
     t.error(err, 'no error')
     db.del('a/a/b', {
