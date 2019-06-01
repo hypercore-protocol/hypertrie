@@ -199,7 +199,8 @@ Options include:
 ```js
 {
   skipLeftNull: false,
-  skipRightNull: false
+  skipRightNull: false,
+  hidden: false
 }
 ```
 
