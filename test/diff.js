@@ -223,9 +223,11 @@ tape('diff on hidden', function (t) {
       let secdiff = db.createDiffStream(0, { hidden: true })
       let pubdiff = db.createDiffStream(0)
       collect(secdiff, (err, actual) => {
+        t.error(err, 'no error')
         t.equal(actual.length, 1)
         t.equal(actual[0].key, 'secret')
         collect(pubdiff, (err, actual) => {
+          t.error(err, 'no error')
           t.equal(actual.length, 1)
           t.equal(actual[0].key, 'public')
           t.end()
