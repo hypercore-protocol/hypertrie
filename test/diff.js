@@ -214,6 +214,29 @@ tape('small diff on big db', function (t) {
   }
 })
 
+tape('diff on hidden', function (t) {
+  const db = create()
+  db.put('secret', 'hyper', { hidden: true }, err => {
+    t.error(err, 'no error')
+    db.put('public', 'knowledge', err => {
+      t.error(err, 'no error')
+      let secdiff = db.createDiffStream(0, { hidden: true })
+      let pubdiff = db.createDiffStream(0)
+      collect(secdiff, (err, actual) => {
+        t.error(err, 'no error')
+        t.equal(actual.length, 1)
+        t.equal(actual[0].key, 'secret')
+        collect(pubdiff, (err, actual) => {
+          t.error(err, 'no error')
+          t.equal(actual.length, 1)
+          t.equal(actual[0].key, 'public')
+          t.end()
+        })
+      })
+    })
+  })
+})
+
 function range (n) {
   return Array(n).join('.').split('.').map((_, i) => '' + i).map(kv)
 }
