@@ -166,6 +166,7 @@ HyperTrie.prototype.createHistoryStream = function (opts) {
 }
 
 HyperTrie.prototype.diff = function (other, prefix, opts) {
+  if (Buffer.isBuffer(other)) return this.diff(0, prefix, Object.assign(opts || {}, { checkpoint: other }))
   if (isOptions(prefix)) return this.diff(other, null, prefix)
   const checkout = (typeof other === 'number' || !other) ? this.checkout(other) : other
   return new Diff(this, checkout, prefix, opts)
