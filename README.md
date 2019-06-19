@@ -200,9 +200,12 @@ Options include:
 {
   skipLeftNull: false,
   skipRightNull: false,
-  hidden: false
+  hidden: false, // set to true to diff the hidden keyspace
+  checkpoint: <checkpoint>
 }
 ```
+
+The order of messages emitted for a specific diff is predictable (ordered by key hash). It is possible to resume a diff at any position. To do so, call the `.checkpoint` method on the diff iterator. It returns a serialized buffer of the current position within the diff. To resume, create a new diff between the same versions and pass the checkpoint buffer as an option.
 
 #### `stream = db.createDiffStream(version, [prefix])`
 
