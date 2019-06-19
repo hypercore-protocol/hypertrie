@@ -237,6 +237,57 @@ tape('diff on hidden', function (t) {
   })
 })
 
+tape('diff checkpoints', function (t) {
+  const db = create()
+  const batchSize = 20
+  db.batch(range(100), function (err) {
+    t.error(err, 'no error')
+    start()
+  })
+
+  function start () {
+    const snap = db.snapshot()
+    let i = 0
+    let batches = []
+    run(snap, 0, null, finish)
+
+    function finish (err, data, checkpoint) {
+      if (data && data.length) batches.push(data)
+      if (checkpoint) run(snap, 0, checkpoint, finish)
+      else finalize()
+    }
+
+    function finalize () {
+      t.equal(batches.length, 5, 'number of batches')
+      const set = new Set()
+      for (let batch of batches) {
+        t.equal(batch.length, 20, 'batch size')
+        batch.forEach(val => set.add(val))
+      }
+      t.equal(set.size, 100, 'no duplicate values')
+      t.end()
+    }
+  }
+
+  function run (db, from, checkpoint, cb) {
+    const diff = db.diff(from, { checkpoint })
+    const data = []
+    diff.next(next)
+    function next (err, msg) {
+      if (!msg) return finish(false)
+      data.push(msg.key)
+      if (data.length >= batchSize) finish(true)
+      else diff.next(next)
+    }
+
+    function finish (hasMore) {
+      let newCheckpoint
+      if (hasMore) newCheckpoint = diff.checkpoint()
+      cb(null, data, newCheckpoint)
+    }
+  }
+})
+
 function range (n) {
   return Array(n).join('.').split('.').map((_, i) => '' + i).map(kv)
 }
