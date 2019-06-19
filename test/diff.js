@@ -247,11 +247,11 @@ tape('diff checkpoints', function (t) {
 
   function start () {
     const snap = db.snapshot()
-    let i = 0
     let batches = []
     run(snap, 0, null, finish)
 
     function finish (err, data, checkpoint) {
+      t.error(err, 'no error')
       if (data && data.length) batches.push(data)
       if (checkpoint) run(snap, 0, checkpoint, finish)
       else finalize()
@@ -274,13 +274,15 @@ tape('diff checkpoints', function (t) {
     const data = []
     diff.next(next)
     function next (err, msg) {
-      if (!msg) return finish(false)
+      if (err) finish(err)
+      if (!msg) return finish(null, false)
       data.push(msg.key)
-      if (data.length >= batchSize) finish(true)
+      if (data.length >= batchSize) finish(null, true)
       else diff.next(next)
     }
 
-    function finish (hasMore) {
+    function finish (err, hasMore) {
+      t.error(err, 'no error')
       let newCheckpoint
       if (hasMore) newCheckpoint = diff.checkpoint()
       cb(null, data, newCheckpoint)
