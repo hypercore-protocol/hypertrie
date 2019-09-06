@@ -139,7 +139,8 @@ Options include:
 
 ```js
 {
-  recursive: true
+  recursive: true,
+  random: false // does a random order iteration
 }
 ```
 
