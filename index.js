@@ -38,6 +38,7 @@ function HyperTrie (storage, key, opts) {
   this.secretKey = null
   this.metadata = opts.metadata || null
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
+  this.alwaysUpdate = !!opts.alwaysUpdate
 
   const feedOpts = Object.assign({}, opts, { valueEncoding: 'binary' })
   this.feed = opts.feed || hypercore(storage, key, feedOpts)
@@ -127,10 +128,17 @@ HyperTrie.prototype.snapshot = function () {
 }
 
 HyperTrie.prototype.head = function (cb) {
+  const self = this
+
   if (!this.opened) return readyAndHead(this, cb)
   if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, cb)
-  if (this.feed.length < 2) return process.nextTick(cb, null, null)
-  this.getBySeq(this.feed.length - 1, cb)
+  if (this.alwaysUpdate) this.feed.update({ hash: false, ifAvailable: true }, onupdated)
+  else process.nextTick(onupdated)
+
+  function onupdated () {
+    if (self.feed.length < 2) return cb(null, null)
+    self.getBySeq(self.feed.length - 1, cb)
+  }
 }
 
 HyperTrie.prototype.list = function (prefix, opts, cb) {
