@@ -130,12 +130,15 @@ HyperTrie.prototype.snapshot = function () {
 HyperTrie.prototype.head = function (cb) {
   const self = this
 
+  console.log('IN HEAD, feed:', this.feed)
   if (!this.opened) return readyAndHead(this, cb)
   if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, cb)
+  console.log('in head, alwaysUpdate:', this.alwaysUpdate)
   if (this.alwaysUpdate) this.feed.update({ hash: false, ifAvailable: true }, onupdated)
   else process.nextTick(onupdated)
 
   function onupdated () {
+    console.log('in onupdated')
     if (self.feed.length < 2) return cb(null, null)
     self.getBySeq(self.feed.length - 1, cb)
   }
