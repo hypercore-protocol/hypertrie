@@ -110,8 +110,8 @@ HyperTrie.prototype.setMetadata = function (metadata) {
   this.metadata = metadata
 }
 
-HyperTrie.prototype.replicate = function (opts) {
-  return this.feed.replicate(opts)
+HyperTrie.prototype.replicate = function (isInitiator, opts) {
+  return this.feed.replicate(isInitiator, opts)
 }
 
 HyperTrie.prototype.checkout = function (version) {
