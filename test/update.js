@@ -1,6 +1,6 @@
 const tape = require('tape')
 const create = require('./helpers/create')
-const protocol = require('hypercore-protocol')
+const HypercoreProtocol = require('hypercore-protocol')
 
 tape('get without alwaysUpdate returns null', t => {
   const trie1 = create()
@@ -15,7 +15,7 @@ tape('get without alwaysUpdate returns null', t => {
         t.end()
       })
     })
-    replicate(trie1, trie2)
+    replicate(trie1, trie2, { live: true })
   })
 })
 
@@ -40,7 +40,7 @@ tape('get with alwaysUpdate will wait for an update', t => {
 tape('(bug) replication with an empty peer fails without exiting', t => {
   const trie1 = create({ alwaysUpdate: true })
   const emptyPeer = {
-    replicate: opts => protocol({ ...opts, live: true, encrypt: false })
+    replicate: opts => new HypercoreProtocol(false, { ...opts, live: true })
   }
   var trie2 = null
 
@@ -60,6 +60,6 @@ tape('(bug) replication with an empty peer fails without exiting', t => {
 })
 
 function replicate (trie1, trie2, opts) {
-  const stream = trie1.replicate(opts)
-  return stream.pipe(trie2.replicate(opts)).pipe(stream)
+  const stream = trie1.replicate(true, opts)
+  return stream.pipe(trie2.replicate(false, opts)).pipe(stream)
 }
