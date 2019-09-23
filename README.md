@@ -32,7 +32,8 @@ Create a new database. Options include:
 ```
 {
   feed: aHypercore, // use this feed instead of loading storage
-  valueEncoding: 'json' // set value encoding
+  valueEncoding: 'json', // set value encoding
+  alwaysUpdate: true // perform an ifAvailable update prior to every head operation
 }
 ```
 
@@ -124,9 +125,11 @@ Returns a new db instance checked out at the version specified.
 
 Same as checkout but just returns the latest version as a checkout.
 
-#### `stream = db.replicate([options])`
+#### `stream = db.replicate(isInitiator, [options])`
 
 Returns a hypercore replication stream for the db. Pipe this together with another hypertrie instance.
+
+Replicate takes an `isInitiator` boolean which is used to indicate if this replication stream is the passive/active replicator.
 
 All options are forwarded to hypercores replicate method.
 
