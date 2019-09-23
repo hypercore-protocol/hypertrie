@@ -37,10 +37,16 @@ tape('get with alwaysUpdate will wait for an update', t => {
   })
 })
 
-tape('(bug) replication with an empty peer fails without exiting', t => {
+tape('replication with an empty peer is not problematic', t => {
   const trie1 = create({ alwaysUpdate: true })
   const emptyPeer = {
-    replicate: opts => new HypercoreProtocol(false, { ...opts, live: true })
+    replicate: (isInitiator, opts) => {
+      const stream = new HypercoreProtocol(isInitiator, { ...opts, live: true })
+      stream.on('discovery-key', dkey => {
+        stream.close(dkey)
+      })
+      return stream
+    }
   }
   var trie2 = null
 

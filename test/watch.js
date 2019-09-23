@@ -74,8 +74,8 @@ tape('remote watch', function (t) {
         t.end()
       })
 
-      const stream = db.replicate()
-      stream.pipe(clone.replicate()).pipe(stream)
+      const stream = db.replicate(true)
+      stream.pipe(clone.replicate(false)).pipe(stream)
     })
   })
 })
