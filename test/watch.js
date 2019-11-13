@@ -79,3 +79,27 @@ tape('remote watch', function (t) {
     })
   })
 })
+
+tape('remote watch with sparse mode and live replication', function (t) {
+  const db = create(null, { sparse: true })
+
+  db.ready(function () {
+    const clone = create(db.key, { alwaysUpdate: true, sparse: true })
+    // The ready triggers an update, which we do not want to trigger a watch event, so we must call this first.
+    clone.ready(function () {
+      const stream = db.replicate(true, { live: true })
+      stream.pipe(clone.replicate(false, { live: true })).pipe(stream)
+
+      var watcher = clone.watch(function () {
+        t.pass('remote watch triggered')
+        watcher.destroy()
+        t.end()
+      })
+
+      setTimeout(function () {
+        console.log('putting')
+        db.put('hello', 'world')
+      }, 50)
+    })
+  })
+})
