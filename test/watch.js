@@ -97,7 +97,6 @@ tape('remote watch with sparse mode and live replication', function (t) {
       })
 
       setTimeout(function () {
-        console.log('putting')
         db.put('hello', 'world')
       }, 50)
     })
