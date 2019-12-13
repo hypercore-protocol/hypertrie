@@ -37,6 +37,7 @@ function HyperTrie (storage, key, opts) {
   this.discoveryKey = null
   this.secretKey = null
   this.metadata = opts.metadata || null
+  this.hash = opts.hash || null
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.alwaysUpdate = !!opts.alwaysUpdate
 
@@ -234,7 +235,7 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
 
   function onnode (err, val) {
     if (err) return cb(err)
-    const node = Node.decode(val, seq, self.valueEncoding)
+    const node = Node.decode(val, seq, self.valueEncoding, self.hash)
     // early exit for the key: '' nodes we write to reset the db
     if (!node.value && !node.key) return cb(null, null)
     cb(null, node)

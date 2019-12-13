@@ -508,3 +508,50 @@ tape('can create with metadata', function (t) {
     })
   })
 })
+
+tape('can support a custom hash function', function (t) {
+  const db = create(null, {
+    valueEncoding: 'utf-8',
+    hash: function (key) {
+      return Buffer.from(key)
+    }
+  })
+  db.ready(function (err) {
+    t.error(err, 'no error')
+    db.put('hello', 'world', function (err) {
+      t.error(err, 'no error')
+      db.get('hello', function (err, node) {
+        t.error(err, 'no error')
+        t.same(node.value, 'world')
+        t.end()
+      })
+    })
+  })
+})
+
+tape('can delete with a custom hash function', function (t) {
+  const db = create(null, {
+    valueEncoding: 'utf-8',
+    hash: function (key) {
+      return Buffer.from(key)
+    }
+  })
+  db.ready(function (err) {
+    t.error(err, 'no error')
+    db.put('hello', 'world', function (err) {
+      t.error(err, 'no error')
+      db.get('hello', function (err, node) {
+        t.error(err, 'no error')
+        t.same(node.value, 'world')
+        db.del('hello', function (err) {
+          t.error(err, 'no error')
+          db.get('hello', function (err, node) {
+            t.error(err, 'no error')
+            t.false(node)
+            t.end()
+          })
+        })
+      })
+    })
+  })
+})
