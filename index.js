@@ -187,9 +187,6 @@ HyperTrie.prototype.createDiffStream = function (other, prefix, opts) {
 
 HyperTrie.prototype.get = function (key, opts, cb) {
   if (typeof opts === 'function') return this.get(key, null, opts)
-  opts = Object.assign({}, opts, {
-    hash: this.hash
-  })
   return new Get(this, key, opts, cb)
 }
 
@@ -199,15 +196,14 @@ HyperTrie.prototype.watch = function (key, onchange) {
 }
 
 HyperTrie.prototype.batch = function (ops, cb) {
-  return new Batch(this, ops, { hash: this.hash }, cb || noop)
+  return new Batch(this, ops, cb || noop)
 }
 
 HyperTrie.prototype.put = function (key, value, opts, cb) {
   if (typeof opts === 'function') return this.put(key, value, null, opts)
   opts = Object.assign({}, opts, {
     batch: null,
-    del: 0,
-    hash: this.hash
+    del: 0
   })
   return new Put(this, key, value, opts, cb || noop)
 }
@@ -215,7 +211,6 @@ HyperTrie.prototype.put = function (key, value, opts, cb) {
 HyperTrie.prototype.del = function (key, opts, cb) {
   if (typeof opts === 'function') return this.del(key, null, opts)
   opts = Object.assign({}, opts, {
-    hash: this.hash,
     batch: null
   })
   return new Delete(this, key, opts, cb)
