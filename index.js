@@ -132,19 +132,13 @@ HyperTrie.prototype.head = function (cb) {
   const self = this
 
   if (!this.opened) return readyAndHead(this, cb)
-  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, onnode)
+  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, cb)
   if (this.alwaysUpdate) this.feed.update({ hash: false, ifAvailable: true }, onupdated)
   else process.nextTick(onupdated)
 
   function onupdated () {
     if (self.feed.length < 2) return cb(null, null)
-    self.getBySeq(self.feed.length - 1, onnode)
-  }
-
-  function onnode (err, node) {
-    if (err) return cb(err)
-    if (node) node = node.final()
-    return cb(null, node)
+    self.getBySeq(self.feed.length - 1, cb)
   }
 }
 
@@ -205,7 +199,7 @@ HyperTrie.prototype.watch = function (key, onchange) {
 }
 
 HyperTrie.prototype.batch = function (ops, cb) {
-  return new Batch(this, ops, cb || noop)
+  return new Batch(this, ops, { hash: this.hash }, cb || noop)
 }
 
 HyperTrie.prototype.put = function (key, value, opts, cb) {
