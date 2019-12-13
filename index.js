@@ -132,13 +132,18 @@ HyperTrie.prototype.head = function (cb) {
   const self = this
 
   if (!this.opened) return readyAndHead(this, cb)
-  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, cb)
+  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, onnode)
   if (this.alwaysUpdate) this.feed.update({ hash: false, ifAvailable: true }, onupdated)
   else process.nextTick(onupdated)
 
   function onupdated () {
     if (self.feed.length < 2) return cb(null, null)
-    self.getBySeq(self.feed.length - 1, cb)
+    self.getBySeq(self.feed.length - 1, onnode)
+  }
+
+  function onnode (err, node) {
+    if (err) return cb(err)
+    return cb(null, node.final())
   }
 }
 
