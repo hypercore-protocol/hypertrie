@@ -37,6 +37,7 @@ function HyperTrie (storage, key, opts) {
   this.discoveryKey = null
   this.secretKey = null
   this.metadata = opts.metadata || null
+  this.hash = opts.hash || null
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.alwaysUpdate = !!opts.alwaysUpdate
 
@@ -186,6 +187,9 @@ HyperTrie.prototype.createDiffStream = function (other, prefix, opts) {
 
 HyperTrie.prototype.get = function (key, opts, cb) {
   if (typeof opts === 'function') return this.get(key, null, opts)
+  opts = Object.assign({}, opts, {
+    hash: this.hash
+  })
   return new Get(this, key, opts, cb)
 }
 
@@ -202,7 +206,8 @@ HyperTrie.prototype.put = function (key, value, opts, cb) {
   if (typeof opts === 'function') return this.put(key, value, null, opts)
   opts = Object.assign({}, opts, {
     batch: null,
-    del: 0
+    del: 0,
+    hash: this.hash
   })
   return new Put(this, key, value, opts, cb || noop)
 }
@@ -210,6 +215,7 @@ HyperTrie.prototype.put = function (key, value, opts, cb) {
 HyperTrie.prototype.del = function (key, opts, cb) {
   if (typeof opts === 'function') return this.del(key, null, opts)
   opts = Object.assign({}, opts, {
+    hash: this.hash,
     batch: null
   })
   return new Delete(this, key, opts, cb)
@@ -234,7 +240,7 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
 
   function onnode (err, val) {
     if (err) return cb(err)
-    const node = Node.decode(val, seq, self.valueEncoding)
+    const node = Node.decode(val, seq, self.valueEncoding, self.hash)
     // early exit for the key: '' nodes we write to reset the db
     if (!node.value && !node.key) return cb(null, null)
     cb(null, node)
