@@ -143,7 +143,8 @@ HyperTrie.prototype.head = function (cb) {
 
   function onnode (err, node) {
     if (err) return cb(err)
-    return cb(null, node.final())
+    if (node) node = node.final()
+    return cb(null, node)
   }
 }
 
