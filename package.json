@@ -4,6 +4,7 @@
   "description": "Distributed single writer key/value store",
   "main": "index.js",
   "dependencies": {
+    "array-lru": "^1.1.1",
     "bulk-write-stream": "^1.1.4",
     "codecs": "^2.0.0",
     "hypercore": "^8.0.0",
