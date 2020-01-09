@@ -51,7 +51,7 @@ function HyperTrie (storage, key, opts) {
 
   this._watchers = []
   this._checkout = (opts && opts.checkout) || 0
-  this._cache = alru((opts && opts.cacheSize) || 32000)
+  this._cache = alru((opts && opts.cacheSize) || 32768)
   this._lock = mutexify()
 
   if (this.feed !== opts.feed) this.feed.on('error', this._onerror.bind(this))
