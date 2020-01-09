@@ -1,3 +1,15 @@
+const events = require('events')
+
+const mutexify = require('mutexify')
+const thunky = require('thunky')
+const codecs = require('codecs')
+const bulk = require('bulk-write-stream')
+const toStream = require('nanoiterator/to-stream')
+const isOptions = require('is-options')
+const hypercore = require('hypercore')
+const inherits = require('inherits')
+const alru = require('array-lru')
+
 const Node = require('./lib/node')
 const Get = require('./lib/get')
 const Put = require('./lib/put')
@@ -8,15 +20,6 @@ const Iterator = require('./lib/iterator')
 const Watch = require('./lib/watch')
 const Diff = require('./lib/diff')
 const { Header } = require('./lib/messages')
-const mutexify = require('mutexify')
-const thunky = require('thunky')
-const codecs = require('codecs')
-const bulk = require('bulk-write-stream')
-const toStream = require('nanoiterator/to-stream')
-const isOptions = require('is-options')
-const hypercore = require('hypercore')
-const inherits = require('inherits')
-const events = require('events')
 
 module.exports = HyperTrie
 
@@ -48,6 +51,7 @@ function HyperTrie (storage, key, opts) {
 
   this._watchers = []
   this._checkout = (opts && opts.checkout) || 0
+  this._cache = alru((opts && opts.cacheSize) || 32000)
   this._lock = mutexify()
 
   if (this.feed !== opts.feed) this.feed.on('error', this._onerror.bind(this))
@@ -229,13 +233,21 @@ HyperTrie.prototype.createWriteStream = function (opts) {
 HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
   if (typeof opts === 'function') return this.getBySeq(seq, null, opts)
   if (seq < 1) return process.nextTick(cb, null, null)
-
   const self = this
+
+  const cached = this._cache.get(seq)
+  if (cached) {
+    // early exit (see below)
+    if (!cached.value && !cached.key) return process.nextTick(cb, null, null)
+    return process.nextTick(cb, null, cached)
+  }
+
   this.feed.get(seq, opts, onnode)
 
   function onnode (err, val) {
     if (err) return cb(err)
     const node = Node.decode(val, seq, self.valueEncoding, self.hash)
+    self._cache.set(seq, node)
     // early exit for the key: '' nodes we write to reset the db
     if (!node.value && !node.key) return cb(null, null)
     cb(null, node)
