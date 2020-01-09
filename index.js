@@ -236,18 +236,13 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
   const self = this
 
   const cached = this._cache.get(seq)
-  if (cached) {
-    // early exit (see below)
-    if (!cached.value && !cached.key) return process.nextTick(cb, null, null)
-    return process.nextTick(cb, null, cached)
-  }
-
+  if (cached) return process.nextTick(onnode, null, cached)
   this.feed.get(seq, opts, onnode)
 
   function onnode (err, val) {
     if (err) return cb(err)
     const node = Node.decode(val, seq, self.valueEncoding, self.hash)
-    self._cache.set(seq, node)
+    self._cache.set(seq, val)
     // early exit for the key: '' nodes we write to reset the db
     if (!node.value && !node.key) return cb(null, null)
     cb(null, node)
