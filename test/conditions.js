@@ -148,3 +148,58 @@ tape('condition: async condition', function (t) {
     }, 200)
   }
 })
+
+tape('condition: deletion closest with similar paths', function (t) {
+  const db = create()
+  db.put('a', 'hello world', err => {
+    t.error(err, 'no error')
+    db.del('a/b', { condition: closestGuard('a'), closest: true }, err => {
+      t.true(err && err.closest, 'closest was a')
+      db.get('a', (err, node) => {
+        t.error(err, 'no error')
+        t.same(node.value, 'hello world')
+        t.end()
+      })
+    })
+  })
+
+  function closestGuard (key) {
+    return function (closest, cb) {
+      if (closest && closest.key === key) {
+        const err = new Error('Closest key was incorrect')
+        err.closest = true
+        return cb(err)
+      }
+      return cb(null, true)
+    }
+  }
+})
+
+tape('condition: deletion closest with multiple hops', function (t) {
+  const db = create()
+  db.put('a', 'hello world', err => {
+    t.error(err, 'no error')
+    db.put('b', 'blah', err => {
+      t.error(err, 'no error')
+      db.del('a/b', { condition: closestGuard('a'), closest: true }, err => {
+        t.true(err && err.closest, 'closest was a')
+        db.get('a', (err, node) => {
+          t.error(err, 'no error')
+          t.same(node.value, 'hello world')
+          t.end()
+        })
+      })
+    })
+  })
+
+  function closestGuard (key) {
+    return function (closest, cb) {
+      if (closest && closest.key === key) {
+        const err = new Error('Closest key was incorrect')
+        err.closest = true
+        return cb(err)
+      }
+      return cb(null, true)
+    }
+  }
+})
