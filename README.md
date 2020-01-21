@@ -175,6 +175,7 @@ Options include:
   lt: seq,
   gte: seq,
   lte: seq,
+  reverse: false,
   live: false // set to true to keep iterating forever
 }
 ```
