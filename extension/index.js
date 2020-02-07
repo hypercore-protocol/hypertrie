@@ -79,6 +79,7 @@ module.exports = class HypertrieExtension {
     if (this.active >= MAX_ACTIVE) return
     this.active++
 
+    const self = this
     let skip = 0
     let total = 0
 
@@ -94,12 +95,14 @@ module.exports = class HypertrieExtension {
       if (skip > 0) {
         skip--
       } else {
+        total++
         b.push(seq)
       }
     }
 
     function onnext (err, node) {
       if (err || node === null || total >= MAX_ACTIVE_BATCH) {
+        self.active--
         b.send()
       } else {
         ite.next(onnext)
@@ -113,6 +116,7 @@ module.exports = class HypertrieExtension {
     if (this.active >= MAX_ACTIVE) return
     this.active++
 
+    const self = this
     const b = new Batch(this.outgoing, from)
     this.trie.checkout(message.head).get(message.key, { extension: false, wait: false, onseq }, ondone)
 
