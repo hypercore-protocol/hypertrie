@@ -1,0 +1,22 @@
+message Get {
+  optional string key = 1;
+  optional uint64 head = 2;
+}
+
+message Iterator {
+  optional string key = 1;
+  optional uint64 head = 2;
+  optional bytes checkpoint = 3;
+}
+
+message Cache {
+  required uint64 start = 1;
+  required uint64 end = 2;
+  repeated uint64 blocks = 3 [packed=true];
+}
+
+message Message {
+  optional Cache cache = 1;
+  optional Iterator iterator = 2;
+  optional Get get = 3;
+}
