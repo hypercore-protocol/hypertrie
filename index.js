@@ -50,8 +50,9 @@ function HyperTrie (storage, key, opts) {
   this.opened = false
   this.ready = thunky(this._ready.bind(this))
 
-  this._extension = new Extension(this)
-  this._extension.outgoing = this.feed.registerExtension('hypertrie', this._extension)
+  this._extension = opts.extension || new Extension(this)
+  if (!opts.extension) this._extension.outgoing = this.feed.registerExtension('hypertrie', this._extension)
+
   this._watchers = []
   this._checkout = (opts && opts.checkout) || 0
   this._cache = alru((opts && opts.cacheSize) || 32768)
@@ -127,7 +128,8 @@ HyperTrie.prototype.checkout = function (version) {
   return new HyperTrie(null, null, {
     checkout: version || 1,
     valueEncoding: this.valueEncoding,
-    feed: this.feed
+    feed: this.feed,
+    extension: this._extension
   })
 }
 
@@ -135,18 +137,29 @@ HyperTrie.prototype.snapshot = function () {
   return this.checkout(this.version)
 }
 
-HyperTrie.prototype.head = function (cb) {
+HyperTrie.prototype.headSeq = function (opts, cb) {
   const self = this
 
-  if (!this.opened) return readyAndHead(this, cb)
-  if (this._checkout !== 0) return this.getBySeq(this._checkout - 1, cb)
-  if (this.alwaysUpdate) this.feed.update({ hash: false, ifAvailable: true }, onupdated)
+  if (!this.opened) return readyAndHeadSeq(this, opts, cb)
+  if (this._checkout !== 0) return cb(null, this._checkout - 1)
+  if (this.alwaysUpdate && (!opts || opts.wait !== false)) this.feed.update({ hash: false, ifAvailable: true }, onupdated)
   else process.nextTick(onupdated)
 
   function onupdated () {
-    if (self.feed.length < 2) return cb(null, null)
-    self.getBySeq(self.feed.length - 1, cb)
+    if (self.feed.length < 2) return cb(null, 0)
+    cb(null, self.feed.length - 1)
   }
+}
+
+HyperTrie.prototype.head = function (opts, cb) {
+  if (typeof opts === 'function') return this.head(null, opts)
+
+  const self = this
+  this.headSeq(opts, function (err, seq) {
+    if (err) return cb(err)
+    if (!seq) return cb(null, null)
+    self.getBySeq(seq, opts, cb)
+  })
 }
 
 HyperTrie.prototype.list = function (prefix, opts, cb) {
@@ -254,10 +267,10 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
 
 function noop () {}
 
-function readyAndHead (self, cb) {
+function readyAndHeadSeq (self, opts, cb) {
   self.ready(function (err) {
     if (err) return cb(err)
-    self.head(cb)
+    self.headSeq(opts, cb)
   })
 }
 
