@@ -10,6 +10,7 @@ const hypercore = require('hypercore')
 const inherits = require('inherits')
 const alru = require('array-lru')
 
+const Extension = require('./extension')
 const Node = require('./lib/node')
 const Get = require('./lib/get')
 const Put = require('./lib/put')
@@ -49,6 +50,8 @@ function HyperTrie (storage, key, opts) {
   this.opened = false
   this.ready = thunky(this._ready.bind(this))
 
+  this._extension = new Extension(this)
+  this._extension.outgoing = this.feed.registerExtension('hypertrie', this._extension)
   this._watchers = []
   this._checkout = (opts && opts.checkout) || 0
   this._cache = alru((opts && opts.cacheSize) || 32768)

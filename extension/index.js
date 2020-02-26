@@ -3,7 +3,7 @@ const FLUSH_BATCH = 128
 const MAX_PASSIVE_BATCH = 2048
 const MAX_ACTIVE_BATCH = MAX_PASSIVE_BATCH + FLUSH_BATCH
 
-const { Message } = require('./message')
+const { Message } = require('./messages')
 
 class Batch {
   constructor (outgoing, from) {
@@ -69,7 +69,7 @@ module.exports = class HypertrieExtension {
 
     for (let i = 0; i < len; i++) {
       const seq = blocks[i]
-      this.trie.feed.download(seq)
+      this.trie.feed.get(seq, () => {}) // hack to move it up in the prio queue
     }
   }
 
