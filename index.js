@@ -10,7 +10,7 @@ const hypercore = require('hypercore')
 const inherits = require('inherits')
 const alru = require('array-lru')
 
-const Extension = require('./extension')
+const Extension = require('./lib/extension')
 const Node = require('./lib/node')
 const Get = require('./lib/get')
 const Put = require('./lib/put')
@@ -47,6 +47,7 @@ function HyperTrie (storage, key, opts) {
 
   const feedOpts = Object.assign({}, opts, { valueEncoding: 'binary' })
   this.feed = opts.feed || hypercore(storage, key, feedOpts)
+  this.feed.maxRequests = opts.maxRequests || 256 // set max requests higher since the payload is small
   this.opened = false
   this.ready = thunky(this._ready.bind(this))
 
