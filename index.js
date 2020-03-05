@@ -51,8 +51,8 @@ function HyperTrie (storage, key, opts) {
   this.opened = false
   this.ready = thunky(this._ready.bind(this))
 
-  this._extension = opts.extension || new Extension(this)
-  if (!opts.extension) this._extension.outgoing = this.feed.registerExtension('hypertrie', this._extension)
+  this._extension = opts.extension === false ? null : (opts.extension || new Extension(this))
+  if (!opts.extension && opts.extension !== false) this._extension.outgoing = this.feed.registerExtension('hypertrie', this._extension)
 
   this._watchers = []
   this._checkout = (opts && opts.checkout) || 0
@@ -130,7 +130,7 @@ HyperTrie.prototype.checkout = function (version) {
     checkout: version || 1,
     valueEncoding: this.valueEncoding,
     feed: this.feed,
-    extension: this._extension
+    extension: this._extension === null ? false : this._extension
   })
 }
 
