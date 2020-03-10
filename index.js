@@ -107,11 +107,15 @@ HyperTrie.prototype._ready = function (cb) {
   })
 }
 
-HyperTrie.prototype.getMetadata = function (cb) {
-  this.feed.get(0, { valueEncoding: Header }, (err, header) => {
+HyperTrie.getMetadata = function (feed, cb) {
+  feed.get(0, { valueEncoding: Header }, (err, header) => {
     if (err) return cb(err)
     return cb(null, header.metadata)
   })
+}
+
+HyperTrie.prototype.getMetadata = function (cb) {
+  HyperTrie.getMetadata(this.feed, cb)
 }
 
 HyperTrie.prototype.setMetadata = function (metadata) {
