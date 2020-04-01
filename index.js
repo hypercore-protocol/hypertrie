@@ -146,7 +146,7 @@ HyperTrie.prototype.headSeq = function (opts, cb) {
   const self = this
 
   if (!this.opened) return readyAndHeadSeq(this, opts, cb)
-  if (this._checkout !== 0) return cb(null, this._checkout - 1)
+  if (this._checkout !== 0) return process.nextTick(cb, null, this._checkout - 1)
   if (this.alwaysUpdate && (!opts || opts.wait !== false)) this.feed.update({ hash: false, ifAvailable: true }, onupdated)
   else process.nextTick(onupdated)
 
