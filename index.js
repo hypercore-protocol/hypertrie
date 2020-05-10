@@ -44,6 +44,7 @@ function HyperTrie (storage, key, opts) {
   this.hash = opts.hash || null
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.alwaysUpdate = !!opts.alwaysUpdate
+  this.alwaysReconnect = !!opts.alwaysReconnect
 
   const feedOpts = Object.assign({}, opts, { valueEncoding: 'binary' })
   this.feed = opts.feed || hypercore(storage, key, feedOpts)
@@ -71,6 +72,11 @@ Object.defineProperty(HyperTrie.prototype, 'version', {
     return this._checkout || this.feed.length
   }
 })
+
+HyperTrie.prototype.reconnect = function (from, opts) {
+  opts = opts ? Object.assign({}, opts, { reconnect: true }) : { reconnect: true }
+  return this.diff(from, opts)
+}
 
 HyperTrie.prototype._onerror = function (err) {
   this.emit('error', err)
@@ -102,6 +108,36 @@ HyperTrie.prototype._ready = function (cb) {
       self.secretKey = self.feed.secretKey
       self.opened = true
       self.emit('ready')
+
+      if (self.alwaysReconnect) {
+        var from = self.feed.length
+        var active = null
+
+        self.feed.on('append', function () {
+          if (!from) {
+            from = self.feed.length
+            return
+          }
+
+          if (active) active.destroy()
+
+          self.emit('reconnecting')
+          const r = active = self.reconnect(from)
+          active.next(function loop (err, data) {
+            if (r !== active) return
+
+            if (err || !data) {
+              active = null
+              from = self.feed.length
+              if (!err) self.emit('reconnected')
+              return
+            }
+
+            active.next(loop)
+          })
+        })
+      }
+
       cb(null)
     }
   })
