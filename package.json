@@ -15,7 +15,7 @@
     "mutexify": "^1.2.0",
     "nanoiterator": "^1.2.0",
     "protocol-buffers-encodings": "^1.1.0",
-    "sodium-universal": "^2.0.0",
+    "siphash24-universal": "^1.0.0",
     "thunky": "^1.0.2",
     "unordered-set": "^2.0.1",
     "varint": "^5.0.0"
