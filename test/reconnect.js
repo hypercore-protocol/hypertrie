@@ -98,6 +98,7 @@ tape('reconnecting twice', function (t) {
         { key: 'bar', value: 'baz' },
         { key: 'baz', value: 'foo' }
       ], function (err) {
+        t.error(err, 'no error')
         clone.get('baz', () => {})
       })
     })
