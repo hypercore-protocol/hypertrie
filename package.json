@@ -7,7 +7,7 @@
     "array-lru": "^1.1.1",
     "bulk-write-stream": "^1.1.4",
     "codecs": "^2.0.0",
-    "hypercore": "^9.0.0",
+    "hypercore": "^9.4.1",
     "hypercore-protocol": "^8.0.0",
     "inherits": "^2.0.3",
     "inspect-custom-symbol": "^1.1.0",
