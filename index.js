@@ -146,10 +146,14 @@ HyperTrie.prototype._ready = function (cb) {
 HyperTrie.getMetadata = function (feed, cb) {
   feed.get(0, (err, msg) => {
     if (err) return cb(err)
+
     try {
       var header = Header.decode(msg)
-    } catch (err) { return cb(err) }
-    return cb(null, header.metadata)
+    } catch (err) {
+      return cb(err)
+    }
+
+    cb(null, header.metadata)
   })
 }
 
