@@ -148,10 +148,8 @@ HyperTrie.getMetadata = function (feed, cb) {
     if (err) return cb(err)
     try {
       var header = Header.decode(msg)
-      return cb(null, header.metadata)
-    } catch (err) {
-      return cb(err)
-    }
+    } catch (err) { return cb(err) }
+    return cb(null, header.metadata)
   })
 }
 
