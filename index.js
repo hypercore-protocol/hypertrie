@@ -98,7 +98,7 @@ HyperTrie.prototype._ready = function (cb) {
     if (err) return done(err)
 
     if (self.feed.length || !self.feed.writable) return done(null)
-    self.feed.append(Header.encode({type: this.headerType, metadata: self.metadata}), done)
+    self.feed.append(Header.encode({type: self.headerType, metadata: self.metadata}), done)
 
     function done (err) {
       if (err) return cb(err)
