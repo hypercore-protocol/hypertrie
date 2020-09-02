@@ -33,6 +33,7 @@ Create a new database. Options include:
 {
   feed: aHypercore, // use this feed instead of loading storage
   valueEncoding: 'json', // set value encoding
+  headerSubtype: undefined, // set subtype in the header message at feed.get(0) 
   alwaysUpdate: true // perform an ifAvailable update prior to every head operation
 }
 ```
