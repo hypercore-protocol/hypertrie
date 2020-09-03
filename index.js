@@ -45,7 +45,7 @@ function HyperTrie (storage, key, opts) {
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
   this.alwaysUpdate = !!opts.alwaysUpdate
   this.alwaysReconnect = !!opts.alwaysReconnect
-  this.headerSubtype = opts.headerSubtype
+  this.subtype = opts.subtype
 
   const feedOpts = Object.assign({}, opts, { valueEncoding: 'binary' })
   this.feed = opts.feed || hypercore(storage, key, feedOpts)
@@ -101,7 +101,7 @@ HyperTrie.prototype._ready = function (cb) {
     self.feed.append(Header.encode({
       type: 'hypertrie',
       metadata: self.metadata,
-      subtype: this.headerSubtype
+      subtype: this.subtype
     }), done)
 
     function done (err) {
