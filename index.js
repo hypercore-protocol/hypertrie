@@ -9,6 +9,7 @@ const isOptions = require('is-options')
 const hypercore = require('hypercore')
 const inherits = require('inherits')
 const alru = require('array-lru')
+const set = require('unordered-set')
 
 const Extension = require('./lib/extension')
 const Node = require('./lib/node')
@@ -73,6 +74,22 @@ Object.defineProperty(HyperTrie.prototype, 'version', {
     return this._checkout || this.feed.length
   }
 })
+
+HyperTrie.prototype._removeWatch = function (w) {
+  set.remove(this._watchers, w)
+}
+
+HyperTrie.prototype._addWatch = function (w) {
+  const self = this
+
+  set.add(this._watchers, w)
+  if (this._watchers.length > 1 || !this.feed.sparse) return
+
+  this.feed.update({ ifAvailable: false }, function loop () {
+    if (self._watchers.length === 0) return
+    self.feed.update({ ifAvailable: false }, loop)
+  })
+}
 
 HyperTrie.prototype.reconnect = function (from, opts) {
   opts = opts ? Object.assign({}, opts, { reconnect: true }) : { reconnect: true }
