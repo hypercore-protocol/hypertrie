@@ -2,6 +2,7 @@
 message Header {
   required string type = 1;
   optional bytes metadata = 2;
+  optional string subtype = 3;
 }
 
 message Node {
