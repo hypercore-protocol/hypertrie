@@ -76,6 +76,29 @@ tape('two new nodes', function (t) {
   })
 })
 
+tape.only('two puts, one delete, diff from an intermediate version', function (t) {
+  const db = create()
+
+  db.put('hello', 'quux', function (err) {
+    t.error(err, 'no error')
+    db.put('other', 'baz', function (err) {
+      t.error(err, 'no error')
+      let version = db.version
+      db.del('hello', function (err) {
+        t.error(err, 'no error')
+        const rs = db.createDiffStream(version)
+        collect(rs, function (err, actual) {
+          t.error(err, 'no error')
+          actual.sort(sort)
+          t.equals(actual.length, 1)
+          t.equals(actual[0].key, 'hello')
+          t.end()
+        })
+      })
+    })
+  })
+})
+
 tape('checkout === head', function (t) {
   const db = create()
 
