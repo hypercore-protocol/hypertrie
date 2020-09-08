@@ -61,6 +61,39 @@ tape('watch and stop watching', function (t) {
   db.put('foo/bar', 'baz')
 })
 
+tape('watch, watch and stop watch first one', function (t) {
+  t.plan(5 + 1)
+
+  const db = create()
+  var bs = 5
+
+  db.ready(function () {
+    const clone = create(db.key, { sparse: true })
+
+    const a = clone.watch('foo', function () {
+      t.pass('got a update')
+      a.destroy()
+    })
+
+    const b = clone.watch('foo', function () {
+      t.pass('got b update')
+
+      if (!--bs) {
+        b.destroy()
+        t.end()
+        return
+      }
+
+      db.put('foo/bar', 'baz')
+    })
+
+    db.put('foo/bar', 'baz')
+
+    const stream = db.replicate(true, { live: true })
+    stream.pipe(clone.replicate(false, { live: true })).pipe(stream)
+  })
+})
+
 tape('remote watch', function (t) {
   const db = create()
 
