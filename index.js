@@ -118,7 +118,7 @@ HyperTrie.prototype._ready = function (cb) {
     self.feed.append(Header.encode({
       type: 'hypertrie',
       metadata: self.metadata,
-      subtype: this.subtype
+      subtype: self.subtype
     }), done)
 
     function done (err) {
