@@ -330,7 +330,7 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
     const node = Node.decode(val, seq, self.valueEncoding, self.hash)
     self._cache.set(seq, val)
     // early exit for the key: '' nodes we write to reset the db
-    if (!node.value && !node.key) return cb(null, null)
+    if (node.value === null && node.key === '') return cb(null, null)
     cb(null, node)
   }
 }
