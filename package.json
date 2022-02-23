@@ -1,6 +1,6 @@
 {
   "name": "hypertrie",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "description": "Distributed single writer key/value store",
   "main": "index.js",
   "dependencies": {
