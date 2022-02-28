@@ -44,6 +44,7 @@ function HyperTrie (storage, key, opts) {
   this.metadata = opts.metadata || null
   this.hash = opts.hash || null
   this.valueEncoding = opts.valueEncoding ? codecs(opts.valueEncoding) : null
+  this.sep = opts.sep || '/'
   this.alwaysUpdate = !!opts.alwaysUpdate
   this.alwaysReconnect = !!opts.alwaysReconnect
   this.subtype = opts.subtype
@@ -250,6 +251,9 @@ HyperTrie.prototype.list = function (prefix, opts, cb) {
 
 HyperTrie.prototype.iterator = function (prefix, opts) {
   if (isOptions(prefix)) return this.iterator('', prefix)
+  opts = Object.assign({}, opts, {
+    sep: this.sep
+  })
   return new Iterator(this, prefix, opts)
 }
 
@@ -278,6 +282,9 @@ HyperTrie.prototype.createDiffStream = function (other, prefix, opts) {
 
 HyperTrie.prototype.get = function (key, opts, cb) {
   if (typeof opts === 'function') return this.get(key, null, opts)
+  opts = Object.assign({}, opts, {
+    sep: this.sep
+  })
   return new Get(this, key, opts, cb)
 }
 
@@ -293,6 +300,7 @@ HyperTrie.prototype.batch = function (ops, cb) {
 HyperTrie.prototype.put = function (key, value, opts, cb) {
   if (typeof opts === 'function') return this.put(key, value, null, opts)
   opts = Object.assign({}, opts, {
+    sep: this.sep,
     batch: null,
     del: 0
   })
@@ -302,6 +310,7 @@ HyperTrie.prototype.put = function (key, value, opts, cb) {
 HyperTrie.prototype.del = function (key, opts, cb) {
   if (typeof opts === 'function') return this.del(key, null, opts)
   opts = Object.assign({}, opts, {
+    sep: this.sep,
     batch: null
   })
   return new Delete(this, key, opts, cb)
@@ -321,14 +330,13 @@ HyperTrie.prototype.getBySeq = function (seq, opts, cb) {
   if (typeof opts === 'function') return this.getBySeq(seq, null, opts)
   if (seq < 1) return process.nextTick(cb, null, null)
   const self = this
-
   const cached = this._cache.get(seq)
   if (cached) return process.nextTick(onnode, null, cached)
   this.feed.get(seq, opts, onnode)
 
   function onnode (err, val) {
     if (err) return cb(err)
-    const node = Node.decode(val, seq, self.valueEncoding, self.hash)
+    const node = Node.decode(val, seq, self.valueEncoding, self.hash, self.sep)
     self._cache.set(seq, val)
     // early exit for the key: '' nodes we write to reset the db
     if (node.value === null && node.key === '') return cb(null, null)
